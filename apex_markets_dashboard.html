@@ -1,0 +1,1597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>APEX MARKETS — Global Stock Intelligence</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+:root {
+  --bg: #080c14;
+  --bg2: #0d1220;
+  --bg3: #111827;
+  --card: #131c2e;
+  --card2: #1a2540;
+  --border: #1e2d45;
+  --border2: #243352;
+  --green: #00d97e;
+  --green2: #00b865;
+  --red: #ff4560;
+  --red2: #cc2040;
+  --cyan: #00b4d8;
+  --cyan2: #0077b6;
+  --gold: #f4b942;
+  --text: #e2eaf8;
+  --text2: #8ba3c7;
+  --text3: #4d6488;
+  --mono: 'Space Mono', monospace;
+  --sans: 'DM Sans', sans-serif;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ─── HEADER ─────────────────────────────────────────── */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 40px;
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 100;
+}
+.logo {
+  font-family: var(--mono);
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--cyan);
+  letter-spacing: 3px;
+}
+.logo span { color: var(--gold); }
+.live-badge {
+  display: flex; align-items: center; gap: 6px;
+  font-family: var(--mono); font-size: 11px;
+  color: var(--green); letter-spacing: 1px;
+}
+.live-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--green);
+  animation: pulse 1.5s infinite;
+}
+@keyframes pulse {
+  0%,100%{ opacity:1; transform:scale(1); }
+  50%{ opacity:0.4; transform:scale(1.3); }
+}
+.header-right {
+  display: flex; gap: 8px; align-items: center;
+}
+.data-tag {
+  font-family: var(--mono); font-size: 10px;
+  color: var(--text3); letter-spacing: 1px;
+  background: var(--bg3); padding: 4px 10px;
+  border-radius: 4px; border: 1px solid var(--border);
+}
+
+/* ─── NAV ────────────────────────────────────────────── */
+.nav {
+  display: flex;
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  padding: 0 40px;
+  gap: 2px;
+  overflow-x: auto;
+}
+.nav-btn {
+  background: none; border: none; color: var(--text3);
+  font-family: var(--mono); font-size: 11px;
+  letter-spacing: 1px; text-transform: uppercase;
+  padding: 12px 18px; cursor: pointer;
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+  transition: all .2s;
+}
+.nav-btn:hover { color: var(--text2); }
+.nav-btn.active { color: var(--cyan); border-bottom-color: var(--cyan); }
+
+/* ─── MAIN ────────────────────────────────────────────── */
+.main { padding: 24px 40px; max-width: 1600px; margin: 0 auto; width: 100%; }
+.page { display: none; }
+.page.active { display: block; animation: fadeIn .3s ease; }
+@keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:none} }
+
+/* ─── SECTION HEADING ─────────────────────────────────── */
+.section-title {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 3px;
+  color: var(--text3);
+  text-transform: uppercase;
+  margin-bottom: 16px;
+  display: flex; align-items: center; gap: 10px;
+}
+.section-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* ─── KPI GRID ───────────────────────────────────────── */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 14px;
+  margin-bottom: 28px;
+}
+.kpi-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 18px 20px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color .2s, transform .2s;
+}
+.kpi-card:hover { border-color: var(--border2); transform: translateY(-2px); }
+.kpi-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--accent, var(--cyan));
+}
+.kpi-label {
+  font-family: var(--mono); font-size: 9px;
+  letter-spacing: 2px; color: var(--text3);
+  text-transform: uppercase; margin-bottom: 10px;
+}
+.kpi-value {
+  font-family: var(--mono); font-size: 22px;
+  font-weight: 700; color: var(--text);
+  line-height: 1;
+}
+.kpi-sub {
+  font-size: 11px; color: var(--text3); margin-top: 6px;
+}
+.kpi-positive { color: var(--green) !important; }
+.kpi-negative { color: var(--red) !important; }
+
+/* ─── CHART CARDS ─────────────────────────────────────── */
+.chart-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.chart-grid-3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.chart-full { grid-column: 1 / -1; }
+.chart-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  min-width: 0;
+}
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.chart-title {
+  font-family: var(--mono); font-size: 10px;
+  letter-spacing: 2px; color: var(--text2);
+  text-transform: uppercase;
+}
+.chart-body { position: relative; width: 100%; }
+canvas { display: block; width: 100% !important; }
+
+/* Chart body heights for desktop */
+.chart-body canvas { height: 280px !important; }
+.chart-body.tall canvas { height: 340px !important; }
+.chart-body.short canvas { height: 220px !important; }
+.chart-body.xshort canvas { height: 180px !important; }
+
+/* ─── SELECT ─────────────────────────────────────────── */
+select {
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  color: var(--text2);
+  font-family: var(--mono); font-size: 10px;
+  padding: 5px 10px; border-radius: 5px;
+  cursor: pointer; outline: none;
+  letter-spacing: 1px;
+}
+select option { background: var(--bg3); }
+
+/* ─── TABLE ──────────────────────────────────────────── */
+.data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.data-table th {
+  font-family: var(--mono); font-size: 9px;
+  letter-spacing: 2px; color: var(--text3);
+  text-transform: uppercase;
+  text-align: left; padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+}
+.data-table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid rgba(30,45,69,.5);
+  color: var(--text2);
+  vertical-align: middle;
+}
+.data-table tr:hover td { background: rgba(255,255,255,.02); }
+.data-table .rank { font-family: var(--mono); color: var(--text3); font-size: 11px; }
+.data-table .brand-name { color: var(--text); font-weight: 600; text-transform: capitalize; }
+.data-table .ticker {
+  font-family: var(--mono); font-size: 11px;
+  color: var(--cyan); background: rgba(0,180,216,.1);
+  padding: 2px 7px; border-radius: 4px;
+}
+.badge {
+  font-family: var(--mono); font-size: 9px;
+  letter-spacing: 1px; padding: 2px 8px;
+  border-radius: 20px; text-transform: uppercase;
+}
+.badge-industry {
+  background: rgba(0,180,216,.1); color: var(--cyan2);
+  border: 1px solid rgba(0,180,216,.2);
+}
+.pos { color: var(--green); font-family: var(--mono); font-size: 12px; }
+.neg { color: var(--red);   font-family: var(--mono); font-size: 12px; }
+.neu { color: var(--text2); font-family: var(--mono); font-size: 12px; }
+
+/* ─── CANDLESTICK ─────────────────────────────────────── */
+#candleContainer {
+  overflow-x: auto;
+  position: relative;
+}
+#candleSvg {
+  display: block;
+}
+
+/* ─── SCATTER / BUBBLE ───────────────────────────────── */
+.two-col {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+/* ─── TABS ───────────────────────────────────────────── */
+.tab-row {
+  display: flex; gap: 6px; margin-bottom: 16px;
+}
+.tab-btn {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  color: var(--text3);
+  font-family: var(--mono); font-size: 10px;
+  letter-spacing: 1px; padding: 6px 14px;
+  border-radius: 6px; cursor: pointer;
+  transition: all .15s;
+}
+.tab-btn.active { background: var(--cyan2); border-color: var(--cyan); color: #fff; }
+
+/* ─── TREEMAP ────────────────────────────────────────── */
+#treemap { width: 100%; height: 340px; position: relative; overflow: hidden; }
+.treemap-cell {
+  position: absolute;
+  border: 1px solid var(--bg);
+  border-radius: 4px;
+  display: flex; flex-direction: column;
+  justify-content: center; align-items: center;
+  cursor: default;
+  overflow: hidden;
+  transition: filter .2s;
+}
+.treemap-cell:hover { filter: brightness(1.2); z-index: 10; }
+.treemap-label {
+  font-family: var(--mono); font-size: 10px;
+  letter-spacing: 1px; color: rgba(255,255,255,.9);
+  text-align: center; text-transform: uppercase;
+  text-shadow: 0 1px 3px rgba(0,0,0,.5);
+}
+.treemap-val {
+  font-size: 11px; color: rgba(255,255,255,.7);
+  margin-top: 2px;
+}
+
+/* ─── COUNTRY MAP ─────────────────────────────────────── */
+.country-bars { display: flex; flex-direction: column; gap: 12px; }
+.country-row { display: flex; align-items: center; gap: 12px; }
+.country-name {
+  font-family: var(--mono); font-size: 11px;
+  color: var(--text2); width: 90px; text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.bar-wrap { flex: 1; background: var(--bg3); border-radius: 4px; height: 26px; position: relative; overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 4px; transition: width .8s ease; }
+.bar-label {
+  position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+  font-family: var(--mono); font-size: 11px; color: rgba(255,255,255,.8);
+}
+
+/* ─── SPARKLINE ──────────────────────────────────────── */
+.sparkline-container { display: flex; align-items: flex-end; gap: 1px; height: 30px; }
+.spark-bar { flex: 1; border-radius: 1px; min-height: 2px; }
+
+/* ─── HEATMAP ────────────────────────────────────────── */
+.heatmap-grid { display: grid; gap: 3px; }
+.heat-cell {
+  border-radius: 4px; display: flex; align-items: center;
+  justify-content: center;
+  font-family: var(--mono); font-size: 9px;
+  letter-spacing: .5px; cursor: default;
+  transition: filter .2s;
+  padding: 6px 4px;
+  text-align: center; line-height: 1.2;
+}
+.heat-cell:hover { filter: brightness(1.3); z-index: 5; position: relative; }
+
+/* ─── COMPANY DEEP DIVE ──────────────────────────────── */
+.company-header {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 20px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px 24px;
+  margin-bottom: 20px;
+}
+.company-logo-box {
+  width: 48px; height: 48px;
+  background: var(--card2);
+  border: 1px solid var(--border2);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--mono); font-size: 12px;
+  color: var(--cyan); font-weight: 700;
+}
+.company-name { font-size: 20px; font-weight: 600; text-transform: capitalize; }
+.company-meta {
+  font-family: var(--mono); font-size: 10px;
+  color: var(--text3); letter-spacing: 1px; margin-top: 3px;
+}
+.company-price { text-align: right; }
+.company-price-val {
+  font-family: var(--mono); font-size: 28px; font-weight: 700;
+}
+.company-price-change { font-family: var(--mono); font-size: 13px; margin-top: 3px; }
+
+/* ─── FILTER PANEL ──────────────────────────────────────── */
+.filter-panel-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 14px;
+}
+.filter-panel-title {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 2px;
+  color: var(--text3); text-transform: uppercase;
+}
+.results-badge {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 1px;
+  background: rgba(0,180,216,.12); color: var(--cyan);
+  border: 1px solid rgba(0,180,216,.25); padding: 2px 10px; border-radius: 20px;
+}
+.filter-row {
+  display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 12px;
+}
+.filter-group {
+  display: flex; flex-direction: column; gap: 4px; min-width: 130px;
+}
+.filter-label {
+  font-family: var(--mono); font-size: 9px; letter-spacing: 1.5px;
+  color: var(--text3); text-transform: uppercase;
+}
+.reset-btn {
+  background: rgba(255,69,96,.1);
+  border: 1px solid rgba(255,69,96,.3);
+  color: #ff4560;
+  font-family: var(--mono); font-size: 10px; letter-spacing: 1.5px;
+  padding: 6px 16px; border-radius: 6px; cursor: pointer;
+  transition: all .15s; text-transform: uppercase;
+}
+.reset-btn:hover { background: rgba(255,69,96,.2); border-color: #ff4560; }
+.reset-btn.inactive { opacity: .3; pointer-events: none; }
+#filterPanel { background: var(--bg3); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; margin-bottom: 16px; }
+.active-chips { display: flex; flex-wrap: wrap; gap: 6px; min-height: 4px; }
+.chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(0,180,216,.1); border: 1px solid rgba(0,180,216,.25);
+  color: var(--cyan); font-family: var(--mono); font-size: 9px;
+  letter-spacing: 1px; padding: 3px 10px; border-radius: 20px;
+  text-transform: uppercase;
+}
+.chip-x { cursor: pointer; opacity: .7; font-size: 11px; line-height:1; }
+.chip-x:hover { opacity: 1; color: #ff4560; }
+
+/* ─── SCROLLBAR ──────────────────────────────────────── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+/* ─── RESPONSIVE ─────────────────────────────────────── */
+@media(max-width:1200px){
+  .chart-grid-3 { grid-template-columns: 1fr 1fr; }
+  .main { padding: 20px 24px; }
+}
+@media(max-width:900px){
+  .chart-grid, .chart-grid-3, .two-col { grid-template-columns: 1fr; }
+  .kpi-grid { grid-template-columns: repeat(2,1fr); }
+  .main { padding: 16px; }
+  .header { padding: 12px 16px; }
+  .nav { padding: 0 16px; }
+}
+@media(max-width:500px){
+  .kpi-grid { grid-template-columns: 1fr 1fr; }
+  .header-right { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="logo">APEX <span>MARKETS</span></div>
+  <div class="live-badge"><div class="live-dot"></div> LIVE ANALYSIS</div>
+  <div class="header-right">
+    <div class="data-tag">61 STOCKS</div>
+    <div class="data-tag">2000 — 2025</div>
+    <div class="data-tag">307K RECORDS</div>
+  </div>
+</header>
+
+<!-- NAV -->
+<nav class="nav">
+  <button class="nav-btn active" onclick="showPage('p1',this)">01 OVERVIEW</button>
+  <button class="nav-btn" onclick="showPage('p2',this)">02 TIME SERIES</button>
+  <button class="nav-btn" onclick="showPage('p3',this)">03 INDUSTRIES</button>
+  <button class="nav-btn" onclick="showPage('p4',this)">04 COUNTRIES</button>
+  <button class="nav-btn" onclick="showPage('p5',this)">05 RISK & VOLATILITY</button>
+  <button class="nav-btn" onclick="showPage('p6',this)">06 COMPANY DIVE</button>
+</nav>
+
+<main class="main">
+
+<!-- ═══════════════════════════════════════════════════════
+     PAGE 1 — EXECUTIVE OVERVIEW
+═══════════════════════════════════════════════════════════ -->
+<section class="page active" id="p1">
+
+  <div class="section-title">Market KPIs</div>
+  <div class="kpi-grid" id="kpiGrid"></div>
+
+  <div class="chart-grid">
+    <div class="chart-card">
+      <div class="chart-header">
+        <div class="chart-title">Top Gainers — Avg Daily Return</div>
+      </div>
+      <div class="chart-body"><canvas id="gainersChart"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-header">
+        <div class="chart-title">Top Losers — Avg Daily Return</div>
+      </div>
+      <div class="chart-body"><canvas id="losersChart"></canvas></div>
+    </div>
+  </div>
+
+  <div class="chart-grid">
+    <div class="chart-card chart-full">
+      <div class="chart-header">
+        <div class="chart-title">Market Snapshot — All 61 Stocks: Return vs Volume</div>
+      </div>
+      <div class="chart-body"><canvas id="bubbleAll"></canvas></div>
+    </div>
+  </div>
+
+  <div class="section-title">All Stocks Leaderboard</div>
+  <div class="chart-card">
+
+    <!-- ── FILTER PANEL ── -->
+    <div id="filterPanel">
+      <div class="filter-panel-header">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="filter-panel-title">&#9788; FILTERS &amp; SORT</span>
+          <span class="results-badge" id="resultsBadge">61 results</span>
+        </div>
+        <button class="reset-btn" id="resetBtn" onclick="resetFilters()">&#10006; RESET ALL</button>
+      </div>
+      <div class="filter-row">
+
+        <div class="filter-group">
+          <label class="filter-label">Sort By</label>
+          <select id="sortField" onchange="renderTable()">
+            <option value="avg_return">Avg Return</option>
+            <option value="avg_volume">Avg Volume</option>
+            <option value="volatility">Volatility</option>
+            <option value="avg_close">Avg Close</option>
+            <option value="total_volume">Total Volume</option>
+            <option value="max_close">All-Time High</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label class="filter-label">Direction</label>
+          <select id="sortDir" onchange="renderTable()">
+            <option value="desc">&#9660; Descending</option>
+            <option value="asc">&#9650; Ascending</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label class="filter-label">Country</label>
+          <select id="filterCountry" onchange="renderTable()">
+            <option value="">All Countries</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label class="filter-label">Industry</label>
+          <select id="filterIndustry" onchange="renderTable()">
+            <option value="">All Industries</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label class="filter-label">Performance</label>
+          <select id="filterPerf" onchange="renderTable()">
+            <option value="">All Stocks</option>
+            <option value="bullish">&#9650; Bullish Only</option>
+            <option value="bearish">&#9660; Bearish Only</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label class="filter-label">Volatility</label>
+          <select id="filterVolat" onchange="renderTable()">
+            <option value="">All Levels</option>
+            <option value="low">&#128994; Low (&lt;1.5)</option>
+            <option value="medium">&#128993; Medium (1.5–3)</option>
+            <option value="high">&#128308; High (&gt;3)</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label class="filter-label">Price Range</label>
+          <select id="filterPrice" onchange="renderTable()">
+            <option value="">Any Price</option>
+            <option value="penny">Under $10</option>
+            <option value="low">$10 – $50</option>
+            <option value="mid">$50 – $200</option>
+            <option value="high">$200 – $500</option>
+            <option value="premium">Over $500</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label class="filter-label">Top N</label>
+          <select id="filterTopN" onchange="renderTable()">
+            <option value="0">All Stocks</option>
+            <option value="5">Top 5</option>
+            <option value="10">Top 10</option>
+            <option value="20">Top 20</option>
+            <option value="30">Top 30</option>
+          </select>
+        </div>
+
+      </div>
+
+      <!-- Active filters chips -->
+      <div id="activeChips" class="active-chips"></div>
+    </div>
+
+    <!-- ── TABLE ── -->
+    <div style="overflow-x:auto">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Company</th>
+            <th>Ticker</th>
+            <th>Industry</th>
+            <th>Country</th>
+            <th>Avg Close</th>
+            <th>Avg Return %</th>
+            <th>Volatility</th>
+            <th>Avg Volume</th>
+          </tr>
+        </thead>
+        <tbody id="stockTableBody"></tbody>
+      </table>
+    </div>
+
+    <div id="noResults" style="display:none;padding:48px;text-align:center;font-family:var(--mono);font-size:12px;color:var(--text3);letter-spacing:2px">
+      NO STOCKS MATCH THE SELECTED FILTERS
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     PAGE 2 — TIME SERIES
+═══════════════════════════════════════════════════════════ -->
+<section class="page" id="p2">
+
+  <div class="chart-card" style="margin-bottom:20px">
+    <div class="chart-header">
+      <div class="chart-title">Multi-Stock Price Trends (Monthly Avg Close)</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <label style="font-family:var(--mono);font-size:10px;color:var(--text3);display:flex;align-items:center;gap:5px;"><input type="checkbox" value="apple"   onchange="updateTS()" checked> Apple</label>
+        <label style="font-family:var(--mono);font-size:10px;color:var(--text3);display:flex;align-items:center;gap:5px;"><input type="checkbox" value="nvidia"  onchange="updateTS()" checked> Nvidia</label>
+        <label style="font-family:var(--mono);font-size:10px;color:var(--text3);display:flex;align-items:center;gap:5px;"><input type="checkbox" value="tesla"   onchange="updateTS()"> Tesla</label>
+        <label style="font-family:var(--mono);font-size:10px;color:var(--text3);display:flex;align-items:center;gap:5px;"><input type="checkbox" value="amazon"  onchange="updateTS()"> Amazon</label>
+        <label style="font-family:var(--mono);font-size:10px;color:var(--text3);display:flex;align-items:center;gap:5px;"><input type="checkbox" value="google"  onchange="updateTS()"> Google</label>
+        <label style="font-family:var(--mono);font-size:10px;color:var(--text3);display:flex;align-items:center;gap:5px;"><input type="checkbox" value="microsoft" onchange="updateTS()"> Microsoft</label>
+        <label style="font-family:var(--mono);font-size:10px;color:var(--text3);display:flex;align-items:center;gap:5px;"><input type="checkbox" value="netflix" onchange="updateTS()"> Netflix</label>
+        <label style="font-family:var(--mono);font-size:10px;color:var(--text3);display:flex;align-items:center;gap:5px;"><input type="checkbox" value="meta"    onchange="updateTS()"> Meta</label>
+      </div>
+    </div>
+    <div class="chart-body"><canvas id="tsChart"></canvas></div>
+  </div>
+
+  <div class="chart-card">
+    <div class="chart-header">
+      <div class="chart-title">Candlestick Chart — Last 120 Sessions</div>
+      <select id="candleSelect" onchange="renderCandle()">
+        <option value="apple">Apple (AAPL)</option>
+        <option value="nvidia">Nvidia (NVDA)</option>
+        <option value="tesla">Tesla (TSLA)</option>
+        <option value="amazon">Amazon (AMZN)</option>
+        <option value="google">Google (GOOGL)</option>
+      </select>
+    </div>
+    <div id="candleContainer">
+      <svg id="candleSvg"></svg>
+    </div>
+    <div id="candleTooltip" style="font-family:var(--mono);font-size:10px;color:var(--text2);margin-top:8px;height:16px;letter-spacing:1px;"></div>
+  </div>
+
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     PAGE 3 — INDUSTRIES
+═══════════════════════════════════════════════════════════ -->
+<section class="page" id="p3">
+
+  <div class="chart-grid">
+    <div class="chart-card">
+      <div class="chart-header"><div class="chart-title">Avg Daily Return by Industry</div></div>
+      <div class="chart-body"><canvas id="indReturnChart"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-header"><div class="chart-title">Volatility by Industry</div></div>
+      <div class="chart-body"><canvas id="indVolatChart"></canvas></div>
+    </div>
+  </div>
+
+  <div class="chart-card" style="margin-bottom:20px">
+    <div class="chart-header"><div class="chart-title">Industry Treemap — Total Volume</div></div>
+    <div id="treemap"></div>
+  </div>
+
+  <div class="chart-card">
+    <div class="chart-header"><div class="chart-title">Industry Heatmap — Return vs Volatility vs Volume</div></div>
+    <div id="heatmapContainer" style="overflow-x:auto"></div>
+  </div>
+
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     PAGE 4 — COUNTRIES
+═══════════════════════════════════════════════════════════ -->
+<section class="page" id="p4">
+
+  <div class="kpi-grid" id="countryKpis"></div>
+
+  <div class="chart-grid">
+    <div class="chart-card">
+      <div class="chart-header"><div class="chart-title">Country Avg Daily Return (%)</div></div>
+      <div class="country-bars" id="countryReturnBars" style="padding:10px 0"></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-header"><div class="chart-title">Country Avg Volume</div></div>
+      <div class="country-bars" id="countryVolBars" style="padding:10px 0"></div>
+    </div>
+  </div>
+
+  <div class="chart-card">
+    <div class="chart-header"><div class="chart-title">Country Comparison — Return vs Volatility</div></div>
+    <div class="chart-body"><canvas id="countryScatter"></canvas></div>
+  </div>
+
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     PAGE 5 — RISK & VOLATILITY
+═══════════════════════════════════════════════════════════ -->
+<section class="page" id="p5">
+
+  <div class="chart-grid">
+    <div class="chart-card chart-full">
+      <div class="chart-header">
+        <div class="chart-title">Risk-Return Matrix — Bubble = Volume | Color = Industry</div>
+      </div>
+      <div class="chart-body"><canvas id="riskReturnChart"></canvas></div>
+    </div>
+  </div>
+
+  <div class="chart-grid">
+    <div class="chart-card">
+      <div class="chart-header"><div class="chart-title">Top 15 Highest Volatility Stocks</div></div>
+      <div class="chart-body"><canvas id="volatRankChart"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-header"><div class="chart-title">Volatility Distribution by Industry</div></div>
+      <div class="chart-body"><canvas id="volatDistChart"></canvas></div>
+    </div>
+  </div>
+
+  <div class="section-title">High Risk / High Reward Stocks</div>
+  <div class="chart-card">
+    <div class="chart-body" style="overflow-x:auto">
+      <table class="data-table">
+        <thead>
+          <tr><th>#</th><th>Company</th><th>Ticker</th><th>Avg Return %</th><th>Volatility</th><th>Industry</th><th>Risk Profile</th></tr>
+        </thead>
+        <tbody id="riskTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     PAGE 6 — COMPANY DEEP DIVE
+═══════════════════════════════════════════════════════════ -->
+<section class="page" id="p6">
+
+  <div style="display:flex;gap:12px;margin-bottom:20px;align-items:center">
+    <select id="diveSelect" onchange="renderDive()" style="font-size:13px;padding:8px 14px">
+    </select>
+    <span style="font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:1px">SELECT A COMPANY TO ANALYZE</span>
+  </div>
+
+  <div class="company-header" id="diveHeader"></div>
+
+  <div class="kpi-grid" id="diveKpis"></div>
+
+  <div class="chart-grid">
+    <div class="chart-card">
+      <div class="chart-header"><div class="chart-title" id="divePriceTitle">Price History (Monthly)</div></div>
+      <div class="chart-body tall" id="divePriceWrapper"><canvas id="divePriceChart"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-header"><div class="chart-title">Return Distribution</div></div>
+      <div class="chart-body"><canvas id="diveReturnDist"></canvas></div>
+    </div>
+  </div>
+
+  <div class="chart-card">
+    <div class="chart-header"><div class="chart-title">Company vs Industry Peers</div></div>
+    <div class="chart-body"><canvas id="divePeerChart"></canvas></div>
+  </div>
+
+</section>
+
+</main>
+
+<script>
+// ══════════════════════════════════════════════
+// DATA
+// ══════════════════════════════════════════════
+const RAW = {"brand": [{"Brand_Name": "3m", "Ticker": "MMM", "Industry_Type": "manufacturing", "Country": "usa", "avg_close": 87.8097, "avg_return": 0.0198, "avg_volume": 3480991.8793, "volatility": 1.3089, "total_volume": 22522017459.0, "max_close": 209.2773, "min_close": 20.8713}, {"Brand_Name": "adidas", "Ticker": "ADDYY", "Industry_Type": "apparel", "Country": "germany", "avg_close": 71.443, "avg_return": 0.0609, "avg_volume": 59625.3687, "volatility": 1.0805, "total_volume": 289183038.0, "max_close": 193.9589, "min_close": 10.6638}, {"Brand_Name": "adobe", "Ticker": "ADBE", "Industry_Type": "technology", "Country": "usa", "avg_close": 155.2078, "avg_return": 0.0728, "avg_volume": 5115460.557, "volatility": 2.1942, "total_volume": 33097029804.0, "max_close": 688.37, "min_close": 8.3178}, {"Brand_Name": "airbnb", "Ticker": "ABNB", "Industry_Type": "hospitality", "Country": "usa", "avg_close": 138.7028, "avg_return": 0.098, "avg_volume": 6007634.0933, "volatility": 2.5815, "total_volume": 7215168546.0, "max_close": 216.84, "min_close": 82.49}, {"Brand_Name": "amazon", "Ticker": "AMZN", "Industry_Type": "e-commerce", "Country": "usa", "avg_close": 48.3162, "avg_return": 0.0776, "avg_volume": 116452264.3594, "volatility": 2.5173, "total_volume": 753446150405.0, "max_close": 242.06, "min_close": 0.2985}, {"Brand_Name": "amd", "Ticker": "AMD", "Industry_Type": "technology", "Country": "usa", "avg_close": 33.1521, "avg_return": -0.0567, "avg_volume": 34009567.2708, "volatility": 3.2213, "total_volume": 220007890675.0, "max_close": 211.38, "min_close": 1.62}, {"Brand_Name": "american eagle outfitters", "Ticker": "AEO", "Industry_Type": "apparel", "Country": "usa", "avg_close": 11.9864, "avg_return": 0.0329, "avg_volume": 5032047.9393, "volatility": 2.6974, "total_volume": 32557350167.0, "max_close": 35.6519, "min_close": 1.4796}, {"Brand_Name": "american express", "Ticker": "AXP", "Industry_Type": "finance", "Country": "usa", "avg_close": 78.274, "avg_return": 0.0325, "avg_volume": 6076273.513, "volatility": 1.8388, "total_volume": 39313489629.0, "max_close": 328.13, "min_close": 8.1675}, {"Brand_Name": "apple", "Ticker": "AAPL", "Industry_Type": "technology", "Country": "usa", "avg_close": 46.4725, "avg_return": 0.048, "avg_volume": 376723829.8304, "volatility": 1.984, "total_volume": 2437403179003.0, "max_close": 259.02, "min_close": 0.1989}, {"Brand_Name": "block", "Ticker": "SQ", "Industry_Type": "financial services", "Country": "usa", "avg_close": 81.6823, "avg_return": 0.0468, "avg_volume": 10403551.5218, "volatility": 2.9955, "total_volume": 24760452622.0, "max_close": 281.81, "min_close": 8.37}, {"Brand_Name": "bmw group", "Ticker": "BAMXF", "Industry_Type": "automotive", "Country": "germany", "avg_close": 64.3424, "avg_return": 0.0374, "avg_volume": 14890.1804, "volatility": 1.0947, "total_volume": 53232395.0, "max_close": 122.0, "min_close": 14.9164}, {"Brand_Name": "chipotle", "Ticker": "CMG", "Industry_Type": "food", "Country": "usa", "avg_close": 619.929, "avg_return": 0.0443, "avg_volume": 1386581.743, "volatility": 2.027, "total_volume": 6856646719.0, "max_close": 3427.6101, "min_close": 38.69}, {"Brand_Name": "cisco", "Ticker": "CSCO", "Industry_Type": "technology", "Country": "usa", "avg_close": 26.5036, "avg_return": 0.0142, "avg_volume": 41715528.2685, "volatility": 1.8499, "total_volume": 269899467897.0, "max_close": 69.38, "min_close": 5.9683}, {"Brand_Name": "coinbase", "Ticker": "COIN", "Industry_Type": "cryptocurrency", "Country": "usa", "avg_close": 171.9966, "avg_return": 0.1444, "avg_volume": 11019766.0179, "volatility": 4.8482, "total_volume": 12309078642.0, "max_close": 375.07, "min_close": 32.53}, {"Brand_Name": "colgate palmolive", "Ticker": "CL", "Industry_Type": "consumer goods", "Country": "usa", "avg_close": 44.7166, "avg_return": 0.0454, "avg_volume": 4379985.9437, "volatility": 1.1483, "total_volume": 28334129070.0, "max_close": 108.77, "min_close": 12.8987}, {"Brand_Name": "costco", "Ticker": "COST", "Industry_Type": "retail", "Country": "usa", "avg_close": 187.9684, "avg_return": 0.0728, "avg_volume": 3257054.3626, "volatility": 1.489, "total_volume": 21073141726.0, "max_close": 1076.86, "min_close": 18.8532}, {"Brand_Name": "crocs", "Ticker": "CROX", "Industry_Type": "footwear", "Country": "usa", "avg_close": 39.2697, "avg_return": 0.0269, "avg_volume": 2127899.6109, "volatility": 3.3614, "total_volume": 10505440379.0, "max_close": 180.57, "min_close": 0.94}, {"Brand_Name": "delta air lines", "Ticker": "DAL", "Industry_Type": "aviation", "Country": "usa", "avg_close": 31.3751, "avg_return": -0.0376, "avg_volume": 11810702.7569, "volatility": 2.7977, "total_volume": 54659932359.0, "max_close": 69.06, "min_close": 3.4835}, {"Brand_Name": "fedex", "Ticker": "FDX", "Industry_Type": "logistics", "Country": "usa", "avg_close": 127.0036, "avg_return": 0.0576, "avg_volume": 2144221.333, "volatility": 1.6131, "total_volume": 13870967803.0, "max_close": 313.52, "min_close": 26.2346}, {"Brand_Name": "foot locker", "Ticker": "FL", "Industry_Type": "footwear", "Country": "usa", "avg_close": 24.1452, "avg_return": 0.0402, "avg_volume": 2324440.9215, "volatility": 2.3724, "total_volume": 15039132762.0, "max_close": 63.8668, "min_close": 3.0034}, {"Brand_Name": "google", "Ticker": "GOOGL", "Industry_Type": "technology", "Country": "usa", "avg_close": 52.1756, "avg_return": 0.0103, "avg_volume": 112822106.243, "volatility": 1.5006, "total_volume": 598859739938.0, "max_close": 206.38, "min_close": 2.5028}, {"Brand_Name": "hershey company", "Ticker": "HSY", "Industry_Type": "food & beverage", "Country": "usa", "avg_close": 80.0954, "avg_return": 0.0591, "avg_volume": 1230395.5219, "volatility": 1.2403, "total_volume": 7959428631.0, "max_close": 273.7848, "min_close": 11.0563}, {"Brand_Name": "hilton", "Ticker": "HLT", "Industry_Type": "hospitality", "Country": "usa", "avg_close": 107.2883, "avg_return": 0.0226, "avg_volume": 2565459.6768, "volatility": 1.5098, "total_volume": 7596326103.0, "max_close": 273.45, "min_close": 33.7283}, {"Brand_Name": "honda", "Ticker": "HMC", "Industry_Type": "automotive", "Country": "japan", "avg_close": 24.2938, "avg_return": 0.0028, "avg_volume": 658475.9137, "volatility": 1.0051, "total_volume": 4259680686.0, "max_close": 37.68, "min_close": 10.0197}, {"Brand_Name": "johnson & johnson", "Ticker": "JNJ", "Industry_Type": "healthcare", "Country": "usa", "avg_close": 78.6626, "avg_return": 0.0274, "avg_volume": 9001874.6709, "volatility": 1.0208, "total_volume": 58242129121.0, "max_close": 178.4569, "min_close": 18.7069}, {"Brand_Name": "jpmorgan chase & co", "Ticker": "JPM", "Industry_Type": "finance", "Country": "usa", "avg_close": 65.25, "avg_return": 0.0251, "avg_volume": 19300025.3658, "volatility": 1.9349, "total_volume": 124871164117.0, "max_close": 296.0, "min_close": 8.5598}, {"Brand_Name": "logitech", "Ticker": "LOGI", "Industry_Type": "technology", "Country": "switzerland", "avg_close": 28.84, "avg_return": 0.0433, "avg_volume": 610731.1719, "volatility": 1.7471, "total_volume": 3950819951.0, "max_close": 134.4197, "min_close": 2.6329}, {"Brand_Name": "lvmh", "Ticker": "LVMUY", "Industry_Type": "luxury goods", "Country": "france", "avg_close": 62.1641, "avg_return": 0.111, "avg_volume": 127443.1143, "volatility": 1.3106, "total_volume": 609942745.0, "max_close": 199.59, "min_close": 6.1537}, {"Brand_Name": "marriott", "Ticker": "MAR", "Industry_Type": "hospitality", "Country": "usa", "avg_close": 73.7986, "avg_return": 0.0777, "avg_volume": 2785500.6237, "volatility": 1.857, "total_volume": 18024974536.0, "max_close": 304.45, "min_close": 9.9643}, {"Brand_Name": "mastercard", "Ticker": "MA", "Industry_Type": "finance", "Country": "usa", "avg_close": 168.4424, "avg_return": 0.0618, "avg_volume": 10412235.5057, "volatility": 1.7287, "total_volume": 50634701264.0, "max_close": 590.74, "min_close": 4.0413}, {"Brand_Name": "mcdonald's", "Ticker": "MCD", "Industry_Type": "food", "Country": "usa", "avg_close": 101.8151, "avg_return": 0.0396, "avg_volume": 5385681.2624, "volatility": 1.2414, "total_volume": 34845357768.0, "max_close": 321.29, "min_close": 7.1342}, {"Brand_Name": "microsoft", "Ticker": "MSFT", "Industry_Type": "technology", "Country": "usa", "avg_close": 95.5452, "avg_return": 0.0271, "avg_volume": 49226365.4046, "volatility": 1.5027, "total_volume": 318494584168.0, "max_close": 498.84, "min_close": 11.3276}, {"Brand_Name": "netflix", "Ticker": "NFLX", "Industry_Type": "entertainment", "Country": "usa", "avg_close": 181.9607, "avg_return": 0.0836, "avg_volume": 15014825.2534, "volatility": 2.7704, "total_volume": 88167053888.0, "max_close": 1339.13, "min_close": 0.3729}, {"Brand_Name": "nike", "Ticker": "NKE", "Industry_Type": "apparel", "Country": "usa", "avg_close": 43.6491, "avg_return": 0.0598, "avg_volume": 10614801.9923, "volatility": 1.5792, "total_volume": 68677768890.0, "max_close": 173.6536, "min_close": 2.5779}, {"Brand_Name": "nintendo", "Ticker": "NTDOY", "Industry_Type": "gaming", "Country": "japan", "avg_close": 7.0098, "avg_return": 0.042, "avg_volume": 1228842.6049, "volatility": 0.9776, "total_volume": 7924805959.0, "max_close": 24.02, "min_close": 1.6454}, {"Brand_Name": "nordstrom", "Ticker": "JWN", "Industry_Type": "retail", "Country": "usa", "avg_close": 26.0417, "avg_return": 0.0771, "avg_volume": 3235248.8848, "volatility": 2.4464, "total_volume": 20812356076.0, "max_close": 60.8827, "min_close": 4.0344}, {"Brand_Name": "nvidia", "Ticker": "NVDA", "Industry_Type": "technology", "Country": "usa", "avg_close": 44.1075, "avg_return": 0.0491, "avg_volume": 84138751.2096, "volatility": 3.1458, "total_volume": 544377720326.0, "max_close": 493.5093, "min_close": 0.5635}, {"Brand_Name": "peloton", "Ticker": "PTON", "Industry_Type": "fitness", "Country": "usa", "avg_close": 35.2201, "avg_return": 0.0918, "avg_volume": 13338567.0445, "volatility": 4.6489, "total_volume": 20087881969.0, "max_close": 167.42, "min_close": 2.88}, {"Brand_Name": "philips", "Ticker": "PHG", "Industry_Type": "technology", "Country": "netherlands", "avg_close": 24.0914, "avg_return": 0.0403, "avg_volume": 1116327.3004, "volatility": 1.3969, "total_volume": 7221521306.0, "max_close": 57.6397, "min_close": 7.5048}, {"Brand_Name": "pinterest", "Ticker": "PINS", "Industry_Type": "social media", "Country": "usa", "avg_close": 34.7885, "avg_return": 0.0448, "avg_volume": 11841648.1911, "volatility": 3.0329, "total_volume": 19147945125.0, "max_close": 89.15, "min_close": 10.92}, {"Brand_Name": "porsche", "Ticker": "POAHY", "Industry_Type": "automotive", "Country": "germany", "avg_close": 5.3795, "avg_return": 0.0786, "avg_volume": 185914.0909, "volatility": 1.25, "total_volume": 732129690.0, "max_close": 11.0138, "min_close": 2.2441}, {"Brand_Name": "procter & gamble", "Ticker": "PG", "Industry_Type": "consumer goods", "Country": "usa", "avg_close": 68.7795, "avg_return": 0.0655, "avg_volume": 8965207.8176, "volatility": 1.0883, "total_volume": 57995929372.0, "max_close": 179.7, "min_close": 14.3852}, {"Brand_Name": "puma", "Ticker": "PMMAF", "Industry_Type": "apparel", "Country": "germany", "avg_close": 62.3072, "avg_return": -0.2904, "avg_volume": 808.0706, "volatility": 3.7448, "total_volume": 1236348.0, "max_close": 127.392, "min_close": 15.02}, {"Brand_Name": "roblox", "Ticker": "RBLX", "Industry_Type": "gaming", "Country": "usa", "avg_close": 52.9046, "avg_return": 0.24, "avg_volume": 12822004.1183, "volatility": 3.5945, "total_volume": 14629906699.0, "max_close": 134.72, "min_close": 23.19}, {"Brand_Name": "salesforce / slack", "Ticker": "CRM", "Industry_Type": "technology", "Country": "usa", "avg_close": 98.347, "avg_return": 0.089, "avg_volume": 6890878.6915, "volatility": 2.2235, "total_volume": 36852419242.0, "max_close": 367.87, "min_close": 2.3975}, {"Brand_Name": "shopify", "Ticker": "SHOP", "Industry_Type": "e-commerce", "Country": "canada", "avg_close": 50.9493, "avg_return": 0.1008, "avg_volume": 16242106.3972, "volatility": 3.1089, "total_volume": 42245718739.0, "max_close": 169.06, "min_close": 1.933}, {"Brand_Name": "southwest airlines", "Ticker": "LUV", "Industry_Type": "aviation", "Country": "usa", "avg_close": 25.2375, "avg_return": 0.0078, "avg_volume": 6650917.194, "volatility": 1.9673, "total_volume": 43031434245.0, "max_close": 63.0759, "min_close": 4.537}, {"Brand_Name": "spotify", "Ticker": "SPOT", "Industry_Type": "music", "Country": "usa", "avg_close": 231.477, "avg_return": 0.0943, "avg_volume": 1879638.182, "volatility": 2.5131, "total_volume": 3531840144.0, "max_close": 775.9, "min_close": 71.05}, {"Brand_Name": "starbucks", "Ticker": "SBUX", "Industry_Type": "food & beverage", "Country": "usa", "avg_close": 38.0669, "avg_return": 0.0803, "avg_volume": 13626210.9651, "volatility": 1.7733, "total_volume": 88161584944.0, "max_close": 120.2785, "min_close": 2.3605}, {"Brand_Name": "target", "Ticker": "TGT", "Industry_Type": "retail", "Country": "usa", "avg_close": 66.7973, "avg_return": 0.0186, "avg_volume": 5627622.9175, "volatility": 1.7543, "total_volume": 36410720276.0, "max_close": 255.3122, "min_close": 14.6428}, {"Brand_Name": "tesla", "Ticker": "TSLA", "Industry_Type": "automotive", "Country": "usa", "avg_close": 92.4276, "avg_return": 0.0358, "avg_volume": 97076321.509, "volatility": 2.9955, "total_volume": 372093540344.0, "max_close": 479.86, "min_close": 1.0533}, {"Brand_Name": "the coca-cola company", "Ticker": "KO", "Industry_Type": "food & beverage", "Country": "usa", "avg_close": 30.4638, "avg_return": 0.0291, "avg_volume": 14770558.7298, "volatility": 1.0976, "total_volume": 95565514982.0, "max_close": 73.9, "min_close": 10.1584}, {"Brand_Name": "the home depot", "Ticker": "HD", "Industry_Type": "retail", "Country": "usa", "avg_close": 113.8687, "avg_return": 0.0366, "avg_volume": 8416878.6884, "volatility": 1.5777, "total_volume": 54448788235.0, "max_close": 431.37, "min_close": 12.503}, {"Brand_Name": "the walt disney company", "Ticker": "DIS", "Industry_Type": "entertainment", "Country": "usa", "avg_close": 65.3025, "avg_return": 0.0362, "avg_volume": 9802719.3937, "volatility": 1.5414, "total_volume": 63423594477.0, "max_close": 201.91, "min_close": 10.8415}, {"Brand_Name": "toyota", "Ticker": "TM", "Industry_Type": "automotive", "Country": "japan", "avg_close": 101.469, "avg_return": -0.0038, "avg_volume": 363929.8924, "volatility": 0.8864, "total_volume": 2354262474.0, "max_close": 254.77, "min_close": 31.8699}, {"Brand_Name": "uber", "Ticker": "UBER", "Industry_Type": "technology", "Country": "usa", "avg_close": 47.691, "avg_return": 0.0315, "avg_volume": 23899277.0169, "volatility": 2.6609, "total_volume": 38286641781.0, "max_close": 93.63, "min_close": 14.82}, {"Brand_Name": "ubisoft", "Ticker": "UBSFY", "Industry_Type": "gaming", "Country": "france", "avg_close": 8.4585, "avg_return": 0.0069, "avg_volume": 85015.3154, "volatility": 1.7469, "total_volume": 285226383.0, "max_close": 24.29, "min_close": 0.964}, {"Brand_Name": "unilever", "Ticker": "UL", "Industry_Type": "consumer goods", "Country": "netherlands", "avg_close": 29.0077, "avg_return": 0.0693, "avg_volume": 1241955.9689, "volatility": 0.852, "total_volume": 8034213163.0, "max_close": 65.59, "min_close": 5.4062}, {"Brand_Name": "visa", "Ticker": "V", "Industry_Type": "finance", "Country": "usa", "avg_close": 118.6512, "avg_return": 0.0488, "avg_volume": 14160436.5571, "volatility": 1.5424, "total_volume": 62405043907.0, "max_close": 373.31, "min_close": 9.5518}, {"Brand_Name": "zoom video communications", "Ticker": "ZM", "Industry_Type": "technology", "Country": "usa", "avg_close": 145.1592, "avg_return": 0.083, "avg_volume": 4667022.2894, "volatility": 2.8508, "total_volume": 7546575042.0, "max_close": 568.34, "min_close": 55.32}, {"Brand_Name": "zoominfo", "Ticker": "ZI", "Industry_Type": "technology", "Country": "usa", "avg_close": 31.4013, "avg_return": -0.0432, "avg_volume": 5029238.9653, "volatility": 3.301, "total_volume": 6658712390.0, "max_close": 77.35, "min_close": 7.41}], "ts": {"apple": {"dates": ["2020-01", "2020-02", "2020-03", "2020-04", "2020-05", "2020-06", "2020-07", "2020-08", "2020-09", "2020-10", "2020-11", "2020-12", "2021-01", "2021-02", "2021-03", "2021-04", "2021-05", "2021-06", "2021-07", "2021-08", "2021-09", "2021-10", "2021-11", "2021-12", "2022-01", "2022-02", "2022-03", "2022-04", "2022-05", "2022-06", "2022-07", "2022-08", "2022-09", "2022-10", "2022-11", "2022-12", "2023-01", "2023-02", "2023-03", "2023-04", "2023-05", "2023-06", "2023-07", "2023-08", "2023-09", "2023-10", "2023-11", "2023-12", "2024-01", "2024-02", "2024-03", "2024-04", "2024-05", "2024-06", "2024-07", "2024-08", "2024-09", "2024-10", "2024-11", "2024-12", "2025-01", "2025-02", "2025-03", "2025-04", "2025-05", "2025-06", "2025-07"], "closes": [76.07, 76.05, 64.16, 66.59, 75.93, 84.76, 93.7, 115.18, 113.08, 114.35, 114.91, 125.25, 130.9, 129.57, 120.09, 129.89, 125.1, 128.28, 143.26, 146.44, 146.61, 143.9, 152.67, 171.82, 168.16, 168.31, 163.87, 165.36, 147.31, 138.78, 148.58, 165.86, 152.1, 144.16, 145.19, 137.29, 135.2, 150.47, 154.54, 164.6, 172.29, 184.03, 192.15, 181.0, 176.73, 174.22, 185.56, 194.06, 187.49, 184.7, 172.7, 169.6, 186.29, 206.8, 224.51, 222.0, 223.75, 229.89, 228.2, 249.83, 234.75, 238.76, 222.62, 201.51, 204.99, 200.49, 211.84]}, "amazon": {"dates": ["2020-01", "2020-02", "2020-03", "2020-04", "2020-05", "2020-06", "2020-07", "2020-08", "2020-09", "2020-10", "2020-11", "2020-12", "2021-01", "2021-02", "2021-03", "2021-04", "2021-05", "2021-06", "2021-07", "2021-08", "2021-09", "2021-10", "2021-11", "2021-12", "2022-01", "2022-02", "2022-03", "2022-04", "2022-05", "2022-06", "2022-07", "2022-08", "2022-09", "2022-10", "2022-11", "2022-12", "2023-01", "2023-02", "2023-03", "2023-04", "2023-05", "2023-06", "2023-07", "2023-08", "2023-09", "2023-10", "2023-11", "2023-12", "2024-01", "2024-02", "2024-03", "2024-04", "2024-05", "2024-06", "2024-07", "2024-08", "2024-09", "2024-10", "2024-11", "2024-12", "2025-01", "2025-02", "2025-03", "2025-04", "2025-05", "2025-06", "2025-07"], "closes": [94.21, 103.31, 93.62, 111.44, 119.71, 130.68, 152.69, 162.46, 158.04, 161.53, 157.09, 159.89, 160.0, 163.19, 153.41, 167.61, 162.31, 168.39, 180.8, 165.65, 171.36, 166.71, 175.88, 170.86, 155.48, 153.78, 154.28, 151.31, 112.47, 112.86, 117.04, 137.44, 123.21, 114.46, 93.95, 87.94, 94.22, 99.21, 96.55, 103.34, 111.94, 126.38, 130.82, 135.5, 135.96, 128.28, 143.46, 149.82, 153.62, 171.0, 176.82, 181.17, 184.18, 186.44, 190.56, 172.6, 184.49, 186.94, 204.21, 224.36, 227.85, 225.12, 198.19, 181.15, 202.19, 213.26, 221.8]}, "google": {"dates": ["2020-01", "2020-02", "2020-03", "2020-04", "2020-05", "2020-06", "2020-07", "2020-08", "2020-09", "2020-10", "2020-11", "2020-12", "2021-01", "2021-02", "2021-03", "2021-04", "2021-05", "2021-06", "2021-07", "2021-08", "2021-09", "2021-10", "2021-11", "2021-12", "2022-01", "2022-02", "2022-03", "2022-04", "2022-05", "2022-06", "2022-07", "2022-08", "2022-09", "2022-10", "2022-11", "2022-12", "2023-01", "2023-02", "2023-03", "2023-04", "2023-05", "2023-06", "2023-07", "2023-08", "2023-09", "2023-10", "2023-11", "2023-12", "2024-01", "2024-02", "2024-03", "2024-04", "2024-05", "2024-06", "2024-07", "2024-08", "2024-09", "2024-10", "2024-11", "2024-12", "2025-01", "2025-02", "2025-03", "2025-04", "2025-05", "2025-06", "2025-07"], "closes": [71.81, 73.14, 59.26, 61.51, 69.07, 71.58, 75.77, 77.25, 75.58, 77.1, 87.17, 88.39, 90.01, 102.9, 102.38, 113.65, 115.43, 121.05, 128.56, 138.37, 141.18, 140.11, 146.76, 145.15, 135.96, 136.71, 134.98, 128.07, 113.19, 112.43, 112.65, 116.26, 103.33, 98.88, 93.91, 92.32, 93.04, 96.42, 98.06, 105.71, 116.12, 122.53, 123.05, 130.55, 134.55, 134.02, 133.23, 135.42, 143.68, 142.67, 142.28, 157.01, 171.8, 177.97, 180.71, 163.74, 158.09, 165.38, 172.95, 187.27, 195.57, 183.59, 165.21, 154.78, 166.7, 172.72, 178.38]}, "nvidia": {"dates": ["2020-01", "2020-02", "2020-03", "2020-04", "2020-05", "2020-06", "2020-07", "2020-08", "2020-09", "2020-10", "2020-11", "2020-12", "2021-01", "2021-02", "2021-03", "2021-04", "2021-05", "2021-06", "2021-07", "2021-08", "2021-09", "2021-10", "2021-11", "2021-12", "2022-01", "2022-02", "2022-03", "2022-04", "2022-05", "2022-06", "2022-07", "2022-08", "2022-09", "2022-10", "2022-11", "2022-12", "2023-01", "2023-02", "2023-03", "2023-04", "2023-05", "2023-06", "2023-07", "2023-08", "2023-09", "2023-10", "2023-11", "2023-12", "2024-01", "2024-02", "2024-03", "2024-04", "2024-05", "2024-06", "2024-07", "2024-08", "2024-09", "2024-10", "2024-11", "2024-12", "2025-01", "2025-02", "2025-03", "2025-04", "2025-05", "2025-06", "2025-07"], "closes": [60.97, 67.48, 60.69, 69.03, 81.58, 90.9, 101.98, 119.42, 127.42, 135.26, 133.46, 131.96, 132.59, 142.46, 128.52, 149.83, 146.62, 181.89, 196.15, 206.79, 219.06, 220.79, 303.46, 298.92, 257.37, 245.97, 248.24, 219.36, 177.71, 170.0, 163.16, 177.46, 131.66, 124.62, 153.04, 162.07, 172.67, 220.35, 251.02, 271.44, 310.51, 409.18, 447.59, 452.5, 322.87, 43.63, 47.52, 48.06, 56.25, 72.54, 89.43, 85.7, 96.21, 124.96, 122.09, 117.11, 114.98, 134.26, 141.95, 137.2, 135.97, 130.64, 115.0, 105.63, 129.77, 145.79, 157.31]}, "tesla": {"dates": ["2020-01", "2020-02", "2020-03", "2020-04", "2020-05", "2020-06", "2020-07", "2020-08", "2020-09", "2020-10", "2020-11", "2020-12", "2021-01", "2021-02", "2021-03", "2021-04", "2021-05", "2021-06", "2021-07", "2021-08", "2021-09", "2021-10", "2021-11", "2021-12", "2022-01", "2022-02", "2022-03", "2022-04", "2022-05", "2022-06", "2022-07", "2022-08", "2022-09", "2022-10", "2022-11", "2022-12", "2023-01", "2023-02", "2023-03", "2023-04", "2023-05", "2023-06", "2023-07", "2023-08", "2023-09", "2023-10", "2023-11", "2023-12", "2024-01", "2024-02", "2024-03", "2024-04", "2024-05", "2024-06", "2024-07", "2024-08", "2024-09", "2024-10", "2024-11", "2024-12", "2025-01", "2025-02", "2025-03", "2025-04", "2025-05", "2025-06", "2025-07"], "closes": [35.24, 53.16, 37.27, 44.24, 53.3, 64.24, 97.34, 120.02, 137.83, 142.4, 155.2, 212.94, 276.26, 264.76, 218.93, 236.54, 205.58, 208.97, 219.71, 235.08, 251.32, 292.78, 373.55, 339.63, 336.72, 292.96, 304.79, 332.46, 255.22, 234.03, 251.39, 294.87, 288.73, 223.81, 191.25, 152.97, 134.2, 199.78, 188.52, 176.96, 175.8, 246.09, 273.51, 242.33, 257.55, 236.91, 229.41, 247.14, 216.13, 192.79, 176.16, 165.87, 177.23, 182.78, 240.7, 209.5, 234.99, 239.58, 318.69, 417.76, 405.31, 342.25, 255.88, 257.7, 332.83, 322.64, 311.76]}, "microsoft": {"dates": ["2020-01", "2020-02", "2020-03", "2020-04", "2020-05", "2020-06", "2020-07", "2020-08", "2020-09", "2020-10", "2020-11", "2020-12", "2021-01", "2021-02", "2021-03", "2021-04", "2021-05", "2021-06", "2021-07", "2021-08", "2021-09", "2021-10", "2021-11", "2021-12", "2022-01", "2022-02", "2022-03", "2022-04", "2022-05", "2022-06", "2022-07", "2022-08", "2022-09", "2022-10", "2022-11", "2022-12", "2023-01", "2023-02", "2023-03", "2023-04", "2023-05", "2023-06", "2023-07", "2023-08", "2023-09", "2023-10", "2023-11", "2023-12", "2024-01", "2024-02", "2024-03", "2024-04", "2024-05", "2024-06", "2024-07", "2024-08", "2024-09", "2024-10", "2024-11", "2024-12", "2025-01", "2025-02", "2025-03", "2025-04", "2025-05", "2025-06", "2025-07"], "closes": [158.36, 172.76, 147.71, 163.67, 176.72, 187.1, 201.06, 208.34, 203.23, 207.2, 208.63, 212.69, 216.61, 234.49, 228.55, 249.98, 242.19, 253.92, 275.96, 288.78, 291.59, 298.14, 330.15, 327.48, 303.8, 294.2, 291.62, 284.78, 263.26, 256.47, 259.15, 277.57, 245.34, 234.77, 235.33, 243.98, 235.67, 258.24, 265.6, 287.4, 313.48, 333.95, 340.97, 324.16, 326.23, 327.08, 366.66, 371.22, 388.03, 407.92, 416.04, 412.52, 417.2, 439.45, 445.99, 412.69, 423.69, 419.8, 418.85, 438.75, 427.81, 407.7, 387.7, 378.87, 450.83, 478.8, 495.2]}, "netflix": {"dates": ["2020-01", "2020-02", "2020-03", "2020-04", "2020-05", "2020-06", "2020-07", "2020-08", "2020-09", "2020-10", "2020-11", "2020-12", "2021-01", "2021-02", "2021-03", "2021-04", "2021-05", "2021-06", "2021-07", "2021-08", "2021-09", "2021-10", "2021-11", "2021-12", "2022-01", "2022-02", "2022-03", "2022-04", "2022-05", "2022-06", "2022-07", "2022-08", "2022-09", "2022-10", "2022-11", "2022-12", "2023-01", "2023-02", "2023-03", "2023-04", "2023-05", "2023-06", "2023-07", "2023-08", "2023-09", "2023-10", "2023-11", "2023-12", "2024-01", "2024-02", "2024-03", "2024-04", "2024-05", "2024-06", "2024-07", "2024-08", "2024-09", "2024-10", "2024-11", "2024-12", "2025-01", "2025-02", "2025-03", "2025-04", "2025-05", "2025-06", "2025-07"], "closes": [338.83, 373.99, 350.59, 404.31, 433.29, 438.98, 499.39, 498.07, 495.55, 515.14, 487.44, 516.57, 526.82, 548.96, 518.12, 533.14, 496.71, 503.32, 528.65, 532.35, 590.8, 642.2, 667.52, 608.48, 487.85, 400.99, 366.79, 297.41, 186.45, 184.85, 199.09, 233.03, 232.11, 256.27, 283.17, 302.04, 334.76, 349.1, 312.6, 333.74, 347.46, 421.46, 440.33, 424.06, 407.44, 384.12, 455.72, 474.06, 505.0, 575.38, 614.01, 598.01, 618.83, 663.95, 654.35, 660.52, 694.15, 731.95, 834.65, 913.82, 904.73, 1010.54, 938.45, 984.46, 1176.07, 1246.03, 1293.21]}, "meta": {"dates": [], "closes": []}}, "ind": [{"Industry_Type": "apparel", "avg_return": 0.0233, "volatility": 2.164, "avg_volume": 5254945.054, "companies": 4}, {"Industry_Type": "automotive", "avg_return": 0.0236, "volatility": 1.5248, "avg_volume": 15627279.0969, "companies": 5}, {"Industry_Type": "aviation", "avg_return": -0.0111, "volatility": 2.3495, "avg_volume": 8802610.0742, "companies": 2}, {"Industry_Type": "consumer goods", "avg_return": 0.0601, "volatility": 1.0374, "avg_volume": 4862383.2434, "companies": 3}, {"Industry_Type": "cryptocurrency", "avg_return": 0.1444, "volatility": 4.8482, "avg_volume": 11019766.0179, "companies": 1}, {"Industry_Type": "e-commerce", "avg_return": 0.0843, "volatility": 2.7001, "avg_volume": 87718208.4824, "companies": 2}, {"Industry_Type": "entertainment", "avg_return": 0.0587, "volatility": 2.213, "avg_volume": 12282502.7034, "companies": 2}, {"Industry_Type": "finance", "avg_return": 0.04, "volatility": 1.7893, "avg_volume": 12481963.0309, "companies": 4}, {"Industry_Type": "financial services", "avg_return": 0.0468, "volatility": 2.9955, "avg_volume": 10403551.5218, "companies": 1}, {"Industry_Type": "fitness", "avg_return": 0.0918, "volatility": 4.6489, "avg_volume": 13338567.0445, "companies": 1}, {"Industry_Type": "food", "avg_return": 0.0416, "volatility": 1.6288, "avg_volume": 3653263.6432, "companies": 2}, {"Industry_Type": "food & beverage", "avg_return": 0.0562, "volatility": 1.401, "avg_volume": 9876167.1677, "companies": 3}, {"Industry_Type": "footwear", "avg_return": 0.0345, "volatility": 2.8429, "avg_volume": 2239376.9739, "companies": 2}, {"Industry_Type": "gaming", "avg_return": 0.0519, "volatility": 1.6878, "avg_volume": 2086792.0549, "companies": 3}, {"Industry_Type": "healthcare", "avg_return": 0.0274, "volatility": 1.0208, "avg_volume": 9001874.6709, "companies": 1}, {"Industry_Type": "hospitality", "avg_return": 0.0647, "volatility": 1.8671, "avg_volume": 3088166.0101, "companies": 3}, {"Industry_Type": "logistics", "avg_return": 0.0576, "volatility": 1.6131, "avg_volume": 2144221.333, "companies": 1}, {"Industry_Type": "luxury goods", "avg_return": 0.111, "volatility": 1.3106, "avg_volume": 127443.1143, "companies": 1}, {"Industry_Type": "manufacturing", "avg_return": 0.0198, "volatility": 1.3089, "avg_volume": 3480991.8793, "companies": 1}, {"Industry_Type": "music", "avg_return": 0.0943, "volatility": 2.5131, "avg_volume": 1879638.182, "companies": 1}, {"Industry_Type": "retail", "avg_return": 0.0512, "volatility": 1.8544, "avg_volume": 5136793.0622, "companies": 4}, {"Industry_Type": "social media", "avg_return": 0.0448, "volatility": 3.0329, "avg_volume": 11841648.1911, "companies": 1}, {"Industry_Type": "technology", "avg_return": 0.0329, "volatility": 2.2342, "avg_volume": 67546691.8801, "companies": 13}], "ctr": [{"Country": "canada", "avg_return": 0.1008, "avg_volume": 16242106.3972, "companies": 1, "avg_volatility": 3.1089}, {"Country": "france", "avg_return": 0.0681, "avg_volume": 109958.129, "companies": 2, "avg_volatility": 1.5066}, {"Country": "germany", "avg_return": 0.0212, "avg_volume": 77433.3456, "companies": 4, "avg_volatility": 1.6475}, {"Country": "japan", "avg_return": 0.0136, "avg_volume": 749922.5831, "companies": 3, "avg_volatility": 0.9579}, {"Country": "netherlands", "avg_return": 0.0548, "avg_volume": 1179141.6346, "companies": 2, "avg_volatility": 1.157}, {"Country": "switzerland", "avg_return": 0.0433, "avg_volume": 610731.1719, "companies": 1, "avg_volatility": 1.7471}, {"Country": "usa", "avg_return": 0.0439, "avg_volume": 28590302.4731, "companies": 48, "avg_volatility": 2.1175}], "gl": {"gainers": [{"Brand_Name": "roblox", "Ticker": "RBLX", "Industry_Type": "gaming", "Country": "usa", "avg_return": 0.24, "volatility": 3.5945, "avg_volume": 12822004.1183}, {"Brand_Name": "coinbase", "Ticker": "COIN", "Industry_Type": "cryptocurrency", "Country": "usa", "avg_return": 0.1444, "volatility": 4.8482, "avg_volume": 11019766.0179}, {"Brand_Name": "lvmh", "Ticker": "LVMUY", "Industry_Type": "luxury goods", "Country": "france", "avg_return": 0.111, "volatility": 1.3106, "avg_volume": 127443.1143}, {"Brand_Name": "shopify", "Ticker": "SHOP", "Industry_Type": "e-commerce", "Country": "canada", "avg_return": 0.1008, "volatility": 3.1089, "avg_volume": 16242106.3972}, {"Brand_Name": "airbnb", "Ticker": "ABNB", "Industry_Type": "hospitality", "Country": "usa", "avg_return": 0.098, "volatility": 2.5815, "avg_volume": 6007634.0933}, {"Brand_Name": "spotify", "Ticker": "SPOT", "Industry_Type": "music", "Country": "usa", "avg_return": 0.0943, "volatility": 2.5131, "avg_volume": 1879638.182}, {"Brand_Name": "peloton", "Ticker": "PTON", "Industry_Type": "fitness", "Country": "usa", "avg_return": 0.0918, "volatility": 4.6489, "avg_volume": 13338567.0445}, {"Brand_Name": "salesforce / slack", "Ticker": "CRM", "Industry_Type": "technology", "Country": "usa", "avg_return": 0.089, "volatility": 2.2235, "avg_volume": 6890878.6915}, {"Brand_Name": "netflix", "Ticker": "NFLX", "Industry_Type": "entertainment", "Country": "usa", "avg_return": 0.0836, "volatility": 2.7704, "avg_volume": 15014825.2534}, {"Brand_Name": "zoom video communications", "Ticker": "ZM", "Industry_Type": "technology", "Country": "usa", "avg_return": 0.083, "volatility": 2.8508, "avg_volume": 4667022.2894}], "losers": [{"Brand_Name": "puma", "Ticker": "PMMAF", "Industry_Type": "apparel", "Country": "germany", "avg_return": -0.2904, "volatility": 3.7448, "avg_volume": 808.0706}, {"Brand_Name": "amd", "Ticker": "AMD", "Industry_Type": "technology", "Country": "usa", "avg_return": -0.0567, "volatility": 3.2213, "avg_volume": 34009567.2708}, {"Brand_Name": "zoominfo", "Ticker": "ZI", "Industry_Type": "technology", "Country": "usa", "avg_return": -0.0432, "volatility": 3.301, "avg_volume": 5029238.9653}, {"Brand_Name": "delta air lines", "Ticker": "DAL", "Industry_Type": "aviation", "Country": "usa", "avg_return": -0.0376, "volatility": 2.7977, "avg_volume": 11810702.7569}, {"Brand_Name": "toyota", "Ticker": "TM", "Industry_Type": "automotive", "Country": "japan", "avg_return": -0.0038, "volatility": 0.8864, "avg_volume": 363929.8924}, {"Brand_Name": "honda", "Ticker": "HMC", "Industry_Type": "automotive", "Country": "japan", "avg_return": 0.0028, "volatility": 1.0051, "avg_volume": 658475.9137}, {"Brand_Name": "ubisoft", "Ticker": "UBSFY", "Industry_Type": "gaming", "Country": "france", "avg_return": 0.0069, "volatility": 1.7469, "avg_volume": 85015.3154}, {"Brand_Name": "southwest airlines", "Ticker": "LUV", "Industry_Type": "aviation", "Country": "usa", "avg_return": 0.0078, "volatility": 1.9673, "avg_volume": 6650917.194}, {"Brand_Name": "google", "Ticker": "GOOGL", "Industry_Type": "technology", "Country": "usa", "avg_return": 0.0103, "volatility": 1.5006, "avg_volume": 112822106.243}, {"Brand_Name": "cisco", "Ticker": "CSCO", "Industry_Type": "technology", "Country": "usa", "avg_return": 0.0142, "volatility": 1.8499, "avg_volume": 41715528.2685}]}, "candles": {"apple": [{"Date": "2025-02-05", "Open": 228.53, "High": 232.67, "Low": 228.27, "Close": 232.47, "Volume": 39620300.0}, {"Date": "2025-02-06", "Open": 231.29, "High": 233.8, "Low": 230.43, "Close": 233.22, "Volume": 29836900.0}, {"Date": "2025-02-07", "Open": 232.51, "High": 234.0, "Low": 227.27, "Close": 227.63, "Volume": 38983016.0}, {"Date": "2025-02-07", "Open": 232.6, "High": 234.0, "Low": 227.26, "Close": 227.63, "Volume": 39666100.0}, {"Date": "2025-02-10", "Open": 229.57, "High": 230.59, "Low": 227.2, "Close": 227.65, "Volume": 33035700.0}, {"Date": "2025-02-11", "Open": 228.2, "High": 235.23, "Low": 228.13, "Close": 232.62, "Volume": 53677600.0}, {"Date": "2025-02-12", "Open": 231.2, "High": 236.96, "Low": 230.68, "Close": 236.87, "Volume": 45201200.0}, {"Date": "2025-02-13", "Open": 236.91, "High": 242.34, "Low": 235.57, "Close": 241.53, "Volume": 53543300.0}, {"Date": "2025-02-14", "Open": 241.25, "High": 245.55, "Low": 240.99, "Close": 244.6, "Volume": 40838100.0}, {"Date": "2025-02-14", "Open": 241.07, "High": 245.41, "Low": 241.0, "Close": 244.6, "Volume": 40145605.0}, {"Date": "2025-02-18", "Open": 244.15, "High": 245.18, "Low": 241.84, "Close": 244.47, "Volume": 48769700.0}, {"Date": "2025-02-19", "Open": 244.66, "High": 246.01, "Low": 243.16, "Close": 244.87, "Volume": 32184200.0}, {"Date": "2025-02-20", "Open": 244.94, "High": 246.78, "Low": 244.29, "Close": 245.83, "Volume": 32278300.0}, {"Date": "2025-02-21", "Open": 245.95, "High": 248.69, "Low": 245.22, "Close": 245.55, "Volume": 53119400.0}, {"Date": "2025-02-21", "Open": 245.96, "High": 248.69, "Low": 245.22, "Close": 245.55, "Volume": 52954219.0}, {"Date": "2025-02-24", "Open": 244.93, "High": 248.86, "Low": 244.42, "Close": 247.1, "Volume": 51225800.0}, {"Date": "2025-02-25", "Open": 248.0, "High": 250.0, "Low": 244.91, "Close": 247.04, "Volume": 47957800.0}, {"Date": "2025-02-26", "Open": 244.33, "High": 244.98, "Low": 239.13, "Close": 240.36, "Volume": 44328100.0}, {"Date": "2025-02-27", "Open": 239.41, "High": 242.46, "Low": 237.06, "Close": 237.3, "Volume": 41078200.0}, {"Date": "2025-02-28", "Open": 236.95, "High": 242.09, "Low": 230.2, "Close": 241.84, "Volume": 56796200.0}, {"Date": "2025-02-28", "Open": 236.95, "High": 242.09, "Low": 234.51, "Close": 241.84, "Volume": 56522103.0}, {"Date": "2025-03-03", "Open": 241.79, "High": 244.03, "Low": 236.11, "Close": 238.03, "Volume": 47088200.0}, {"Date": "2025-03-04", "Open": 237.71, "High": 240.07, "Low": 234.68, "Close": 235.93, "Volume": 53724800.0}, {"Date": "2025-03-05", "Open": 235.42, "High": 236.55, "Low": 229.23, "Close": 235.74, "Volume": 47200800.0}, {"Date": "2025-03-06", "Open": 234.44, "High": 237.86, "Low": 233.16, "Close": 235.33, "Volume": 45100000.0}, {"Date": "2025-03-07", "Open": 235.11, "High": 241.37, "Low": 234.76, "Close": 239.07, "Volume": 46245700.0}, {"Date": "2025-03-07", "Open": 235.1, "High": 241.37, "Low": 234.76, "Close": 239.07, "Volume": 45520263.0}, {"Date": "2025-03-10", "Open": 235.54, "High": 236.16, "Low": 224.22, "Close": 227.48, "Volume": 71880000.0}, {"Date": "2025-03-11", "Open": 223.81, "High": 225.84, "Low": 217.45, "Close": 220.84, "Volume": 76087700.0}, {"Date": "2025-03-12", "Open": 220.14, "High": 221.75, "Low": 214.91, "Close": 216.98, "Volume": 62466400.0}, {"Date": "2025-03-13", "Open": 215.95, "High": 216.84, "Low": 208.42, "Close": 209.68, "Volume": 61250000.0}, {"Date": "2025-03-14", "Open": 211.25, "High": 213.94, "Low": 209.58, "Close": 213.49, "Volume": 60034237.0}, {"Date": "2025-03-14", "Open": 211.25, "High": 213.95, "Low": 209.58, "Close": 213.49, "Volume": 60060200.0}, {"Date": "2025-03-17", "Open": 213.31, "High": 215.22, "Low": 209.97, "Close": 214.0, "Volume": 48042800.0}, {"Date": "2025-03-18", "Open": 214.16, "High": 215.15, "Low": 211.49, "Close": 212.69, "Volume": 42391800.0}, {"Date": "2025-03-19", "Open": 214.22, "High": 218.76, "Low": 213.75, "Close": 215.24, "Volume": 54336700.0}, {"Date": "2025-03-20", "Open": 213.99, "High": 217.49, "Low": 212.22, "Close": 214.1, "Volume": 48799300.0}, {"Date": "2025-03-21", "Open": 211.51, "High": 218.84, "Low": 211.47, "Close": 218.27, "Volume": 93387509.0}, {"Date": "2025-03-21", "Open": 211.56, "High": 218.84, "Low": 211.28, "Close": 218.27, "Volume": 93954500.0}, {"Date": "2025-03-24", "Open": 221.0, "High": 221.48, "Low": 218.58, "Close": 220.73, "Volume": 44256500.0}, {"Date": "2025-03-25", "Open": 220.77, "High": 224.1, "Low": 220.08, "Close": 223.75, "Volume": 34455800.0}, {"Date": "2025-03-26", "Open": 223.51, "High": 225.02, "Low": 220.47, "Close": 221.53, "Volume": 34466100.0}, {"Date": "2025-03-27", "Open": 221.39, "High": 224.99, "Low": 220.56, "Close": 223.85, "Volume": 37049500.0}, {"Date": "2025-03-28", "Open": 221.65, "High": 223.8, "Low": 217.68, "Close": 217.9, "Volume": 39525987.0}, {"Date": "2025-03-28", "Open": 221.67, "High": 223.81, "Low": 217.68, "Close": 217.9, "Volume": 39784100.0}, {"Date": "2025-03-31", "Open": 217.01, "High": 225.62, "Low": 216.23, "Close": 222.13, "Volume": 65259800.0}, {"Date": "2025-04-01", "Open": 219.81, "High": 223.68, "Low": 218.9, "Close": 223.19, "Volume": 36377700.0}, {"Date": "2025-04-02", "Open": 221.32, "High": 225.19, "Low": 221.02, "Close": 223.89, "Volume": 35114000.0}, {"Date": "2025-04-03", "Open": 205.54, "High": 207.49, "Low": 201.25, "Close": 203.19, "Volume": 103204700.0}, {"Date": "2025-04-04", "Open": 193.89, "High": 199.88, "Low": 187.34, "Close": 188.38, "Volume": 125569000.0}, {"Date": "2025-04-04", "Open": 193.93, "High": 199.88, "Low": 187.35, "Close": 188.38, "Volume": 124921508.0}, {"Date": "2025-04-08", "Open": 186.7, "High": 190.34, "Low": 169.21, "Close": 172.42, "Volume": 120363400.0}, {"Date": "2025-04-09", "Open": 171.95, "High": 200.61, "Low": 171.89, "Close": 198.85, "Volume": 184067400.0}, {"Date": "2025-04-10", "Open": 189.07, "High": 194.78, "Low": 183.0, "Close": 190.42, "Volume": 121685000.0}, {"Date": "2025-04-11", "Open": 186.1, "High": 199.54, "Low": 186.06, "Close": 198.15, "Volume": 87300000.0}, {"Date": "2025-04-11", "Open": 186.18, "High": 199.54, "Low": 186.06, "Close": 198.15, "Volume": 86538298.0}, {"Date": "2025-04-14", "Open": 211.44, "High": 212.94, "Low": 201.16, "Close": 202.52, "Volume": 101203700.0}, {"Date": "2025-04-15", "Open": 201.86, "High": 203.51, "Low": 199.8, "Close": 202.14, "Volume": 51103200.0}, {"Date": "2025-04-16", "Open": 198.36, "High": 200.7, "Low": 192.37, "Close": 194.27, "Volume": 59658900.0}, {"Date": "2025-04-17", "Open": 197.2, "High": 198.83, "Low": 194.42, "Close": 196.98, "Volume": 51334300.0}, {"Date": "2025-04-17", "Open": 197.15, "High": 198.83, "Low": 194.42, "Close": 196.98, "Volume": 51275970.0}, {"Date": "2025-04-21", "Open": 193.27, "High": 193.8, "Low": 189.81, "Close": 193.16, "Volume": 46663300.0}, {"Date": "2025-04-22", "Open": 196.12, "High": 201.59, "Low": 195.97, "Close": 199.74, "Volume": 52660200.0}, {"Date": "2025-04-23", "Open": 206.0, "High": 208.0, "Low": 202.8, "Close": 204.6, "Volume": 52863100.0}, {"Date": "2025-04-24", "Open": 204.89, "High": 208.83, "Low": 202.94, "Close": 208.37, "Volume": 47199300.0}, {"Date": "2025-04-25", "Open": 206.37, "High": 209.75, "Low": 206.2, "Close": 209.28, "Volume": 38198600.0}, {"Date": "2025-04-25", "Open": 206.43, "High": 209.43, "Low": 206.2, "Close": 209.28, "Volume": 37905822.0}, {"Date": "2025-04-28", "Open": 210.0, "High": 211.5, "Low": 207.46, "Close": 210.14, "Volume": 38652400.0}, {"Date": "2025-04-29", "Open": 208.69, "High": 212.24, "Low": 208.37, "Close": 211.21, "Volume": 36786900.0}, {"Date": "2025-04-30", "Open": 209.3, "High": 213.58, "Low": 206.67, "Close": 212.5, "Volume": 51661400.0}, {"Date": "2025-05-01", "Open": 209.08, "High": 214.56, "Low": 208.9, "Close": 213.32, "Volume": 56391200.0}, {"Date": "2025-05-02", "Open": 206.09, "High": 206.99, "Low": 202.16, "Close": 205.35, "Volume": 100912500.0}, {"Date": "2025-05-02", "Open": 206.09, "High": 206.99, "Low": 202.16, "Close": 205.35, "Volume": 99699111.0}, {"Date": "2025-05-05", "Open": 203.1, "High": 204.1, "Low": 198.21, "Close": 198.89, "Volume": 68915400.0}, {"Date": "2025-05-12", "Open": 210.97, "High": 211.27, "Low": 206.75, "Close": 210.79, "Volume": 63024455.0}, {"Date": "2025-05-13", "Open": 210.43, "High": 213.4, "Low": 209.0, "Close": 212.93, "Volume": 51759900.0}, {"Date": "2025-05-14", "Open": 212.43, "High": 213.94, "Low": 210.58, "Close": 212.33, "Volume": 49253000.0}, {"Date": "2025-05-15", "Open": 210.95, "High": 212.96, "Low": 209.54, "Close": 211.45, "Volume": 44979900.0}, {"Date": "2025-05-16", "Open": 212.32, "High": 212.57, "Low": 209.77, "Close": 211.26, "Volume": 53164417.0}, {"Date": "2025-05-16", "Open": 212.36, "High": 212.57, "Low": 209.77, "Close": 211.26, "Volume": 53659100.0}, {"Date": "2025-05-19", "Open": 207.91, "High": 209.48, "Low": 204.26, "Close": 208.78, "Volume": 45310800.0}, {"Date": "2025-05-20", "Open": 207.67, "High": 208.47, "Low": 205.03, "Close": 206.86, "Volume": 42443700.0}, {"Date": "2025-05-21", "Open": 205.17, "High": 207.04, "Low": 200.71, "Close": 202.09, "Volume": 59134800.0}, {"Date": "2025-05-22", "Open": 200.71, "High": 202.75, "Low": 199.7, "Close": 201.36, "Volume": 46633900.0}, {"Date": "2025-05-23", "Open": 193.67, "High": 197.7, "Low": 193.46, "Close": 195.27, "Volume": 78314800.0}, {"Date": "2025-05-23", "Open": 193.66, "High": 197.7, "Low": 193.46, "Close": 195.27, "Volume": 77631468.0}, {"Date": "2025-05-27", "Open": 198.3, "High": 200.74, "Low": 197.43, "Close": 200.21, "Volume": 56229000.0}, {"Date": "2025-05-28", "Open": 200.59, "High": 202.73, "Low": 199.9, "Close": 200.42, "Volume": 44158300.0}, {"Date": "2025-05-29", "Open": 203.58, "High": 203.81, "Low": 198.51, "Close": 199.95, "Volume": 51396800.0}, {"Date": "2025-05-30", "Open": 199.37, "High": 201.96, "Low": 196.78, "Close": 200.85, "Volume": 70753100.0}, {"Date": "2025-05-30", "Open": 199.4, "High": 201.95, "Low": 196.78, "Close": 200.85, "Volume": 69799163.0}, {"Date": "2025-06-02", "Open": 200.28, "High": 202.13, "Low": 200.12, "Close": 201.7, "Volume": 35343100.0}, {"Date": "2025-06-03", "Open": 201.35, "High": 203.77, "Low": 200.96, "Close": 203.27, "Volume": 46342500.0}, {"Date": "2025-06-04", "Open": 202.91, "High": 206.24, "Low": 202.1, "Close": 202.82, "Volume": 43507100.0}, {"Date": "2025-06-05", "Open": 203.5, "High": 204.75, "Low": 200.15, "Close": 200.63, "Volume": 55126100.0}, {"Date": "2025-06-06", "Open": 203.0, "High": 205.7, "Low": 202.05, "Close": 203.92, "Volume": 46539200.0}, {"Date": "2025-06-06", "Open": 202.99, "High": 205.7, "Low": 202.05, "Close": 203.92, "Volume": 46121557.0}, {"Date": "2025-06-09", "Open": 204.39, "High": 206.0, "Low": 200.02, "Close": 201.45, "Volume": 72726700.0}, {"Date": "2025-06-10", "Open": 200.6, "High": 204.35, "Low": 200.57, "Close": 202.67, "Volume": 54553200.0}, {"Date": "2025-06-11", "Open": 203.5, "High": 204.5, "Low": 198.41, "Close": 198.78, "Volume": 60820200.0}, {"Date": "2025-06-12", "Open": 199.08, "High": 199.68, "Low": 197.36, "Close": 199.2, "Volume": 43758300.0}, {"Date": "2025-06-13", "Open": 199.73, "High": 200.37, "Low": 195.7, "Close": 196.45, "Volume": 51362400.0}, {"Date": "2025-06-13", "Open": 199.73, "High": 200.37, "Low": 195.77, "Close": 196.45, "Volume": 50778564.0}, {"Date": "2025-06-16", "Open": 197.3, "High": 198.69, "Low": 196.56, "Close": 198.42, "Volume": 42886800.0}, {"Date": "2025-06-17", "Open": 197.2, "High": 198.39, "Low": 195.21, "Close": 195.64, "Volume": 38736900.0}, {"Date": "2025-06-18", "Open": 195.95, "High": 197.57, "Low": 195.07, "Close": 196.58, "Volume": 44864157.0}, {"Date": "2025-06-18", "Open": 195.94, "High": 197.57, "Low": 195.07, "Close": 196.58, "Volume": 45350400.0}, {"Date": "2025-06-20", "Open": 198.24, "High": 201.7, "Low": 196.86, "Close": 201.0, "Volume": 95914700.0}, {"Date": "2025-06-20", "Open": 198.24, "High": 201.7, "Low": 196.86, "Close": 201.0, "Volume": 95316548.0}, {"Date": "2025-06-23", "Open": 201.63, "High": 202.3, "Low": 198.96, "Close": 201.5, "Volume": 55595500.0}, {"Date": "2025-06-24", "Open": 202.59, "High": 203.44, "Low": 200.2, "Close": 200.3, "Volume": 53972500.0}, {"Date": "2025-06-25", "Open": 201.45, "High": 203.67, "Low": 200.62, "Close": 201.56, "Volume": 39454000.0}, {"Date": "2025-06-26", "Open": 201.43, "High": 202.64, "Low": 199.46, "Close": 201.0, "Volume": 50667900.0}, {"Date": "2025-06-27", "Open": 201.89, "High": 203.22, "Low": 200.0, "Close": 201.08, "Volume": 73114100.0}, {"Date": "2025-06-27", "Open": 201.9, "High": 203.22, "Low": 200.22, "Close": 201.08, "Volume": 70534466.0}, {"Date": "2025-06-30", "Open": 202.01, "High": 207.39, "Low": 199.26, "Close": 205.17, "Volume": 91612700.0}, {"Date": "2025-07-01", "Open": 206.67, "High": 210.19, "Low": 206.14, "Close": 207.82, "Volume": 78673300.0}, {"Date": "2025-07-02", "Open": 208.91, "High": 213.34, "Low": 208.14, "Close": 212.44, "Volume": 67893400.0}, {"Date": "2025-07-03", "Open": 212.15, "High": 214.65, "Low": 211.81, "Close": 213.55, "Volume": 34955800.0}, {"Date": "2025-07-03", "Open": 212.15, "High": 214.65, "Low": 211.81, "Close": 213.55, "Volume": 34697317.0}], "nvidia": [{"Date": "2025-02-05", "Open": 121.76, "High": 125.0, "Low": 120.76, "Close": 124.83, "Volume": 262230800.0}, {"Date": "2025-02-06", "Open": 127.42, "High": 128.77, "Low": 125.21, "Close": 128.68, "Volume": 250526000.0}, {"Date": "2025-02-07", "Open": 129.16, "High": 130.37, "Low": 127.6, "Close": 129.84, "Volume": 226819095.0}, {"Date": "2025-02-07", "Open": 129.22, "High": 130.37, "Low": 125.0, "Close": 129.84, "Volume": 227369400.0}, {"Date": "2025-02-10", "Open": 130.09, "High": 135.0, "Low": 129.96, "Close": 133.57, "Volume": 216245300.0}, {"Date": "2025-02-11", "Open": 132.58, "High": 134.48, "Low": 131.02, "Close": 132.8, "Volume": 178355800.0}, {"Date": "2025-02-12", "Open": 130.02, "High": 132.24, "Low": 129.08, "Close": 131.14, "Volume": 159753200.0}, {"Date": "2025-02-13", "Open": 131.56, "High": 136.5, "Low": 131.17, "Close": 135.29, "Volume": 196897200.0}, {"Date": "2025-02-14", "Open": 136.48, "High": 139.25, "Low": 135.5, "Close": 138.85, "Volume": 194892300.0}, {"Date": "2025-02-14", "Open": 136.41, "High": 139.19, "Low": 135.5, "Close": 138.85, "Volume": 194448420.0}, {"Date": "2025-02-18", "Open": 141.27, "High": 143.44, "Low": 137.93, "Close": 139.4, "Volume": 218478900.0}, {"Date": "2025-02-19", "Open": 139.51, "High": 141.36, "Low": 137.22, "Close": 139.23, "Volume": 167011000.0}, {"Date": "2025-02-20", "Open": 140.03, "High": 140.66, "Low": 136.79, "Close": 140.11, "Volume": 143445900.0}, {"Date": "2025-02-21", "Open": 140.04, "High": 141.46, "Low": 134.03, "Close": 134.43, "Volume": 227352400.0}, {"Date": "2025-02-21", "Open": 140.0, "High": 141.46, "Low": 134.04, "Close": 134.43, "Volume": 225991924.0}, {"Date": "2025-02-24", "Open": 136.56, "High": 138.59, "Low": 130.08, "Close": 130.28, "Volume": 250042800.0}, {"Date": "2025-02-25", "Open": 129.98, "High": 130.2, "Low": 124.44, "Close": 126.63, "Volume": 270032600.0}, {"Date": "2025-02-26", "Open": 129.99, "High": 133.73, "Low": 128.49, "Close": 131.28, "Volume": 316880500.0}, {"Date": "2025-02-27", "Open": 135.0, "High": 135.01, "Low": 120.01, "Close": 120.15, "Volume": 440689400.0}, {"Date": "2025-02-28", "Open": 118.02, "High": 125.09, "Low": 116.4, "Close": 124.92, "Volume": 388160100.0}, {"Date": "2025-02-28", "Open": 118.04, "High": 125.07, "Low": 116.41, "Close": 124.92, "Volume": 382905771.0}, {"Date": "2025-03-03", "Open": 123.51, "High": 123.7, "Low": 112.28, "Close": 114.06, "Volume": 409178300.0}, {"Date": "2025-03-04", "Open": 110.65, "High": 119.31, "Low": 110.11, "Close": 115.99, "Volume": 396334300.0}, {"Date": "2025-03-05", "Open": 117.58, "High": 118.28, "Low": 114.51, "Close": 117.3, "Volume": 283707500.0}, {"Date": "2025-03-06", "Open": 113.53, "High": 115.35, "Low": 110.22, "Close": 110.57, "Volume": 319708800.0}, {"Date": "2025-03-07", "Open": 111.25, "High": 113.48, "Low": 107.56, "Close": 112.69, "Volume": 341058300.0}, {"Date": "2025-03-07", "Open": 111.18, "High": 113.48, "Low": 107.56, "Close": 112.69, "Volume": 339787217.0}, {"Date": "2025-03-10", "Open": 109.9, "High": 111.85, "Low": 105.46, "Close": 106.98, "Volume": 363486600.0}, {"Date": "2025-03-11", "Open": 106.99, "High": 112.24, "Low": 104.77, "Close": 108.76, "Volume": 353708300.0}, {"Date": "2025-03-12", "Open": 114.12, "High": 116.76, "Low": 112.88, "Close": 115.74, "Volume": 322345000.0}, {"Date": "2025-03-13", "Open": 117.03, "High": 117.76, "Low": 113.79, "Close": 115.58, "Volume": 297950800.0}, {"Date": "2025-03-14", "Open": 118.61, "High": 121.88, "Low": 118.15, "Close": 121.67, "Volume": 276742800.0}, {"Date": "2025-03-14", "Open": 118.62, "High": 121.88, "Low": 118.15, "Close": 121.67, "Volume": 274061576.0}, {"Date": "2025-03-17", "Open": 122.74, "High": 122.89, "Low": 118.03, "Close": 119.53, "Volume": 254773000.0}, {"Date": "2025-03-18", "Open": 118.0, "High": 119.02, "Low": 114.54, "Close": 115.43, "Volume": 298384400.0}, {"Date": "2025-03-19", "Open": 117.27, "High": 120.45, "Low": 115.68, "Close": 117.52, "Volume": 271766100.0}, {"Date": "2025-03-20", "Open": 116.55, "High": 120.2, "Low": 116.47, "Close": 118.53, "Volume": 248250400.0}, {"Date": "2025-03-21", "Open": 116.94, "High": 117.99, "Low": 115.42, "Close": 117.7, "Volume": 265954100.0}, {"Date": "2025-03-21", "Open": 116.96, "High": 117.99, "Low": 115.42, "Close": 117.7, "Volume": 263619579.0}, {"Date": "2025-03-24", "Open": 119.88, "High": 122.22, "Low": 119.34, "Close": 121.41, "Volume": 227701000.0}, {"Date": "2025-03-25", "Open": 120.55, "High": 121.29, "Low": 118.92, "Close": 120.69, "Volume": 167077800.0}, {"Date": "2025-03-26", "Open": 118.73, "High": 118.84, "Low": 112.71, "Close": 113.76, "Volume": 293463300.0}, {"Date": "2025-03-27", "Open": 111.35, "High": 114.45, "Low": 110.66, "Close": 111.43, "Volume": 236254000.0}, {"Date": "2025-03-28", "Open": 111.49, "High": 112.87, "Low": 109.08, "Close": 109.67, "Volume": 227835915.0}, {"Date": "2025-03-28", "Open": 111.49, "High": 112.87, "Low": 109.07, "Close": 109.67, "Volume": 229177400.0}, {"Date": "2025-03-31", "Open": 105.13, "High": 110.96, "Low": 103.65, "Close": 108.38, "Volume": 298611800.0}, {"Date": "2025-04-01", "Open": 108.52, "High": 110.2, "Low": 106.47, "Close": 110.15, "Volume": 221710300.0}, {"Date": "2025-04-02", "Open": 107.29, "High": 111.98, "Low": 106.79, "Close": 110.42, "Volume": 217058500.0}, {"Date": "2025-04-03", "Open": 103.51, "High": 105.63, "Low": 101.6, "Close": 101.8, "Volume": 337275100.0}, {"Date": "2025-04-04", "Open": 98.91, "High": 100.13, "Low": 92.11, "Close": 94.31, "Volume": 529707700.0}, {"Date": "2025-04-04", "Open": 98.94, "High": 100.12, "Low": 92.11, "Close": 94.31, "Volume": 525608136.0}, {"Date": "2025-04-08", "Open": 103.81, "High": 105.85, "Low": 94.46, "Close": 96.3, "Volume": 472775500.0}, {"Date": "2025-04-09", "Open": 98.89, "High": 115.1, "Low": 97.53, "Close": 114.33, "Volume": 609886300.0}, {"Date": "2025-04-10", "Open": 109.37, "High": 110.86, "Low": 99.15, "Close": 107.57, "Volume": 435765200.0}, {"Date": "2025-04-11", "Open": 108.5, "High": 111.55, "Low": 107.48, "Close": 110.93, "Volume": 312853800.0}, {"Date": "2025-04-11", "Open": 108.59, "High": 111.55, "Low": 107.48, "Close": 110.93, "Volume": 310088547.0}, {"Date": "2025-04-14", "Open": 114.11, "High": 114.29, "Low": 109.07, "Close": 110.71, "Volume": 263685000.0}, {"Date": "2025-04-15", "Open": 110.97, "High": 113.62, "Low": 110.5, "Close": 112.2, "Volume": 221749000.0}, {"Date": "2025-04-16", "Open": 104.55, "High": 106.79, "Low": 100.45, "Close": 104.49, "Volume": 395706700.0}, {"Date": "2025-04-17", "Open": 104.43, "High": 104.47, "Low": 100.05, "Close": 101.49, "Volume": 290021924.0}, {"Date": "2025-04-17", "Open": 104.45, "High": 104.47, "Low": 100.05, "Close": 101.49, "Volume": 290833400.0}, {"Date": "2025-04-21", "Open": 98.77, "High": 99.44, "Low": 95.04, "Close": 96.91, "Volume": 287197300.0}, {"Date": "2025-04-22", "Open": 98.78, "High": 99.81, "Low": 97.28, "Close": 98.89, "Volume": 237594100.0}, {"Date": "2025-04-23", "Open": 104.52, "High": 104.8, "Low": 102.02, "Close": 102.71, "Volume": 246475500.0}, {"Date": "2025-04-24", "Open": 103.48, "High": 106.54, "Low": 103.11, "Close": 106.43, "Volume": 219017200.0}, {"Date": "2025-04-25", "Open": 106.85, "High": 111.92, "Low": 105.73, "Close": 111.01, "Volume": 250407100.0}, {"Date": "2025-04-25", "Open": 106.86, "High": 111.92, "Low": 105.73, "Close": 111.01, "Volume": 248902488.0}, {"Date": "2025-04-28", "Open": 109.69, "High": 110.37, "Low": 106.02, "Close": 108.73, "Volume": 207051900.0}, {"Date": "2025-04-29", "Open": 107.67, "High": 110.2, "Low": 107.44, "Close": 109.02, "Volume": 169328600.0}, {"Date": "2025-04-30", "Open": 104.47, "High": 108.92, "Low": 104.08, "Close": 108.92, "Volume": 232009600.0}, {"Date": "2025-05-01", "Open": 113.08, "High": 114.94, "Low": 111.3, "Close": 111.61, "Volume": 235173900.0}, {"Date": "2025-05-02", "Open": 114.18, "High": 115.4, "Low": 113.37, "Close": 114.5, "Volume": 189784700.0}, {"Date": "2025-05-02", "Open": 114.18, "High": 115.4, "Low": 113.37, "Close": 114.5, "Volume": 189377211.0}, {"Date": "2025-05-05", "Open": 112.91, "High": 114.67, "Low": 112.66, "Close": 113.82, "Volume": 132825600.0}, {"Date": "2025-05-12", "Open": 121.94, "High": 123.0, "Low": 120.28, "Close": 123.0, "Volume": 222047962.0}, {"Date": "2025-05-13", "Open": 124.98, "High": 131.22, "Low": 124.47, "Close": 129.93, "Volume": 328069800.0}, {"Date": "2025-05-14", "Open": 133.2, "High": 135.44, "Low": 131.68, "Close": 135.34, "Volume": 279637200.0}, {"Date": "2025-05-15", "Open": 134.29, "High": 136.3, "Low": 132.66, "Close": 134.83, "Volume": 225899500.0}, {"Date": "2025-05-16", "Open": 136.22, "High": 136.35, "Low": 133.46, "Close": 135.4, "Volume": 222651500.0}, {"Date": "2025-05-16", "Open": 136.25, "High": 136.31, "Low": 133.46, "Close": 135.4, "Volume": 218314761.0}, {"Date": "2025-05-19", "Open": 132.39, "High": 135.87, "Low": 132.39, "Close": 135.57, "Volume": 192376100.0}, {"Date": "2025-05-20", "Open": 134.29, "High": 134.58, "Low": 132.62, "Close": 134.38, "Volume": 160778500.0}, {"Date": "2025-05-21", "Open": 133.06, "High": 137.4, "Low": 130.59, "Close": 131.8, "Volume": 269728700.0}, {"Date": "2025-05-22", "Open": 132.23, "High": 134.25, "Low": 131.55, "Close": 132.83, "Volume": 186784100.0}, {"Date": "2025-05-23", "Open": 130.0, "High": 132.68, "Low": 129.16, "Close": 131.29, "Volume": 198367700.0}, {"Date": "2025-05-23", "Open": 129.99, "High": 132.68, "Low": 129.17, "Close": 131.29, "Volume": 197101531.0}, {"Date": "2025-05-27", "Open": 134.15, "High": 135.66, "Low": 133.31, "Close": 135.5, "Volume": 192126300.0}, {"Date": "2025-05-28", "Open": 136.03, "High": 137.25, "Low": 134.79, "Close": 134.81, "Volume": 295482900.0}, {"Date": "2025-05-29", "Open": 142.25, "High": 143.49, "Low": 137.91, "Close": 139.19, "Volume": 369241900.0}, {"Date": "2025-05-30", "Open": 138.72, "High": 139.62, "Low": 132.92, "Close": 135.13, "Volume": 332443400.0}, {"Date": "2025-05-30", "Open": 138.73, "High": 139.62, "Low": 132.92, "Close": 135.13, "Volume": 323313507.0}, {"Date": "2025-06-02", "Open": 135.49, "High": 138.12, "Low": 135.4, "Close": 137.38, "Volume": 197158400.0}, {"Date": "2025-06-03", "Open": 138.78, "High": 142.0, "Low": 137.95, "Close": 141.22, "Volume": 224850000.0}, {"Date": "2025-06-04", "Open": 142.19, "High": 142.39, "Low": 139.54, "Close": 141.92, "Volume": 166666600.0}, {"Date": "2025-06-05", "Open": 142.17, "High": 144.0, "Low": 138.83, "Close": 139.99, "Volume": 231397900.0}, {"Date": "2025-06-06", "Open": 142.51, "High": 143.27, "Low": 141.51, "Close": 141.72, "Volume": 153618600.0}, {"Date": "2025-06-06", "Open": 142.54, "High": 143.27, "Low": 141.51, "Close": 141.72, "Volume": 153222461.0}, {"Date": "2025-06-09", "Open": 143.19, "High": 145.0, "Low": 141.94, "Close": 142.63, "Volume": 184612200.0}, {"Date": "2025-06-10", "Open": 142.69, "High": 144.29, "Low": 141.53, "Close": 143.96, "Volume": 155372400.0}, {"Date": "2025-06-11", "Open": 144.61, "High": 144.99, "Low": 141.87, "Close": 142.83, "Volume": 167009400.0}, {"Date": "2025-06-12", "Open": 141.97, "High": 145.0, "Low": 141.85, "Close": 145.0, "Volume": 161651300.0}, {"Date": "2025-06-13", "Open": 142.48, "High": 143.58, "Low": 140.85, "Close": 141.97, "Volume": 180374800.0}, {"Date": "2025-06-13", "Open": 142.48, "High": 143.58, "Low": 140.85, "Close": 141.97, "Volume": 177854288.0}, {"Date": "2025-06-16", "Open": 143.35, "High": 146.18, "Low": 143.2, "Close": 144.69, "Volume": 182052400.0}, {"Date": "2025-06-17", "Open": 144.49, "High": 145.22, "Low": 143.78, "Close": 144.12, "Volume": 138340800.0}, {"Date": "2025-06-18", "Open": 144.01, "High": 145.62, "Low": 143.12, "Close": 145.48, "Volume": 160064629.0}, {"Date": "2025-06-18", "Open": 144.01, "High": 145.65, "Low": 143.12, "Close": 145.48, "Volume": 161039800.0}, {"Date": "2025-06-20", "Open": 145.45, "High": 146.2, "Low": 142.65, "Close": 143.85, "Volume": 242403400.0}, {"Date": "2025-06-20", "Open": 145.43, "High": 146.2, "Low": 142.65, "Close": 143.85, "Volume": 240532263.0}, {"Date": "2025-06-23", "Open": 142.5, "High": 144.78, "Low": 142.03, "Close": 144.17, "Volume": 152144600.0}, {"Date": "2025-06-24", "Open": 145.56, "High": 147.96, "Low": 145.5, "Close": 147.9, "Volume": 187096500.0}, {"Date": "2025-06-25", "Open": 149.27, "High": 154.45, "Low": 149.26, "Close": 154.31, "Volume": 268315900.0}, {"Date": "2025-06-26", "Open": 155.98, "High": 156.72, "Low": 154.0, "Close": 155.02, "Volume": 197458900.0}, {"Date": "2025-06-27", "Open": 156.04, "High": 158.71, "Low": 155.26, "Close": 157.75, "Volume": 258753300.0}, {"Date": "2025-06-27", "Open": 156.0, "High": 158.71, "Low": 155.26, "Close": 157.75, "Volume": 247425442.0}, {"Date": "2025-06-30", "Open": 158.4, "High": 158.66, "Low": 155.96, "Close": 157.99, "Volume": 194187600.0}, {"Date": "2025-07-01", "Open": 156.29, "High": 157.2, "Low": 151.49, "Close": 153.3, "Volume": 212674300.0}, {"Date": "2025-07-02", "Open": 152.98, "High": 157.6, "Low": 152.97, "Close": 157.25, "Volume": 170894500.0}, {"Date": "2025-07-03", "Open": 158.37, "High": 160.98, "Low": 157.77, "Close": 159.34, "Volume": 143716100.0}, {"Date": "2025-07-03", "Open": 158.35, "High": 160.98, "Low": 157.77, "Close": 159.34, "Volume": 142313659.0}], "tesla": [{"Date": "2025-02-05", "Open": 387.51, "High": 388.39, "Low": 375.53, "Close": 378.17, "Volume": 57223300.0}, {"Date": "2025-02-06", "Open": 373.03, "High": 375.4, "Low": 363.18, "Close": 374.32, "Volume": 77650100.0}, {"Date": "2025-02-07", "Open": 370.18, "High": 380.55, "Low": 360.34, "Close": 361.62, "Volume": 68552768.0}, {"Date": "2025-02-07", "Open": 370.19, "High": 380.55, "Low": 360.34, "Close": 361.62, "Volume": 69494500.0}, {"Date": "2025-02-10", "Open": 356.21, "High": 362.7, "Low": 350.51, "Close": 350.73, "Volume": 76860600.0}, {"Date": "2025-02-11", "Open": 345.8, "High": 349.37, "Low": 325.1, "Close": 328.5, "Volume": 118041900.0}, {"Date": "2025-02-12", "Open": 329.94, "High": 346.4, "Low": 329.12, "Close": 336.51, "Volume": 104520600.0}, {"Date": "2025-02-13", "Open": 345.0, "High": 358.69, "Low": 342.85, "Close": 355.94, "Volume": 88984300.0}, {"Date": "2025-02-14", "Open": 360.62, "High": 361.99, "Low": 347.5, "Close": 355.84, "Volume": 67898313.0}, {"Date": "2025-02-14", "Open": 360.62, "High": 362.0, "Low": 347.5, "Close": 355.84, "Volume": 68054700.0}, {"Date": "2025-02-18", "Open": 355.01, "High": 359.1, "Low": 350.02, "Close": 354.11, "Volume": 51455200.0}, {"Date": "2025-02-19", "Open": 354.0, "High": 367.34, "Low": 353.67, "Close": 360.56, "Volume": 66960000.0}, {"Date": "2025-02-20", "Open": 361.51, "High": 362.3, "Low": 348.0, "Close": 354.4, "Volume": 45818000.0}, {"Date": "2025-02-21", "Open": 353.44, "High": 354.98, "Low": 334.42, "Close": 337.8, "Volume": 73787800.0}, {"Date": "2025-02-21", "Open": 353.16, "High": 354.98, "Low": 334.42, "Close": 337.8, "Volume": 73498643.0}, {"Date": "2025-02-24", "Open": 338.14, "High": 342.4, "Low": 324.7, "Close": 330.53, "Volume": 75468200.0}, {"Date": "2025-02-25", "Open": 327.02, "High": 328.89, "Low": 297.25, "Close": 302.8, "Volume": 133817500.0}, {"Date": "2025-02-26", "Open": 303.71, "High": 309.0, "Low": 288.04, "Close": 290.8, "Volume": 99373300.0}, {"Date": "2025-02-27", "Open": 291.16, "High": 297.23, "Low": 280.88, "Close": 281.95, "Volume": 101309500.0}, {"Date": "2025-02-28", "Open": 279.5, "High": 293.88, "Low": 273.6, "Close": 292.98, "Volume": 115397200.0}, {"Date": "2025-02-28", "Open": 279.46, "High": 293.61, "Low": 273.6, "Close": 292.98, "Volume": 115197070.0}, {"Date": "2025-03-03", "Open": 300.34, "High": 303.94, "Low": 277.3, "Close": 284.65, "Volume": 115144200.0}, {"Date": "2025-03-04", "Open": 270.93, "High": 284.35, "Low": 261.84, "Close": 272.04, "Volume": 126256700.0}, {"Date": "2025-03-05", "Open": 272.92, "High": 279.55, "Low": 267.71, "Close": 279.1, "Volume": 93814200.0}, {"Date": "2025-03-06", "Open": 272.06, "High": 272.65, "Low": 260.02, "Close": 263.45, "Volume": 98043700.0}, {"Date": "2025-03-07", "Open": 259.32, "High": 266.25, "Low": 250.73, "Close": 262.67, "Volume": 102193000.0}, {"Date": "2025-03-07", "Open": 259.27, "High": 266.25, "Low": 250.73, "Close": 262.67, "Volume": 101496505.0}, {"Date": "2025-03-10", "Open": 252.54, "High": 253.37, "Low": 220.0, "Close": 222.15, "Volume": 186610300.0}, {"Date": "2025-03-11", "Open": 225.31, "High": 237.06, "Low": 217.02, "Close": 230.58, "Volume": 173898500.0}, {"Date": "2025-03-12", "Open": 247.22, "High": 251.84, "Low": 241.1, "Close": 248.09, "Volume": 140904000.0}, {"Date": "2025-03-13", "Open": 248.13, "High": 248.29, "Low": 232.6, "Close": 240.68, "Volume": 114296900.0}, {"Date": "2025-03-14", "Open": 247.31, "High": 251.58, "Low": 240.74, "Close": 249.98, "Volume": 99169080.0}, {"Date": "2025-03-14", "Open": 247.31, "High": 251.58, "Low": 240.73, "Close": 249.98, "Volume": 99963500.0}, {"Date": "2025-03-17", "Open": 245.06, "High": 245.4, "Low": 232.8, "Close": 238.01, "Volume": 111379700.0}, {"Date": "2025-03-18", "Open": 228.16, "High": 230.1, "Low": 222.28, "Close": 225.31, "Volume": 110835700.0}, {"Date": "2025-03-19", "Open": 231.61, "High": 241.41, "Low": 229.2, "Close": 235.86, "Volume": 111250900.0}, {"Date": "2025-03-20", "Open": 233.35, "High": 238.0, "Low": 230.05, "Close": 236.26, "Volume": 98723100.0}, {"Date": "2025-03-21", "Open": 234.99, "High": 249.49, "Low": 234.56, "Close": 248.71, "Volume": 130939441.0}, {"Date": "2025-03-21", "Open": 234.99, "High": 249.52, "Low": 234.55, "Close": 248.71, "Volume": 132211300.0}, {"Date": "2025-03-24", "Open": 258.08, "High": 278.64, "Low": 256.33, "Close": 278.39, "Volume": 167716100.0}, {"Date": "2025-03-25", "Open": 283.6, "High": 288.2, "Low": 271.28, "Close": 288.14, "Volume": 149151000.0}, {"Date": "2025-03-26", "Open": 282.66, "High": 284.9, "Low": 266.51, "Close": 272.06, "Volume": 153629800.0}, {"Date": "2025-03-27", "Open": 272.48, "High": 291.85, "Low": 271.82, "Close": 273.13, "Volume": 162034400.0}, {"Date": "2025-03-28", "Open": 275.5, "High": 276.1, "Low": 260.58, "Close": 263.55, "Volume": 122381779.0}, {"Date": "2025-03-28", "Open": 275.58, "High": 276.1, "Low": 260.57, "Close": 263.55, "Volume": 123226900.0}, {"Date": "2025-03-31", "Open": 249.31, "High": 260.56, "Low": 243.36, "Close": 259.16, "Volume": 133450000.0}, {"Date": "2025-04-01", "Open": 263.8, "High": 277.45, "Low": 259.25, "Close": 268.46, "Volume": 145924600.0}, {"Date": "2025-04-02", "Open": 254.6, "High": 284.99, "Low": 251.27, "Close": 282.76, "Volume": 209746300.0}, {"Date": "2025-04-03", "Open": 265.29, "High": 276.3, "Low": 261.51, "Close": 267.28, "Volume": 135752400.0}, {"Date": "2025-04-04", "Open": 255.37, "High": 261.0, "Low": 236.0, "Close": 239.43, "Volume": 179251800.0}, {"Date": "2025-04-04", "Open": 255.38, "High": 261.0, "Low": 236.0, "Close": 239.43, "Volume": 180324400.0}, {"Date": "2025-04-08", "Open": 245.0, "High": 250.44, "Low": 217.8, "Close": 221.86, "Volume": 170068600.0}, {"Date": "2025-04-09", "Open": 224.69, "High": 274.69, "Low": 223.88, "Close": 272.2, "Volume": 218067600.0}, {"Date": "2025-04-10", "Open": 260.0, "High": 262.49, "Low": 239.33, "Close": 252.4, "Volume": 180875500.0}, {"Date": "2025-04-11", "Open": 251.84, "High": 257.74, "Low": 241.36, "Close": 252.31, "Volume": 128656900.0}, {"Date": "2025-04-11", "Open": 251.84, "High": 257.74, "Low": 241.36, "Close": 252.31, "Volume": 126758648.0}, {"Date": "2025-04-14", "Open": 258.36, "High": 261.8, "Low": 245.93, "Close": 252.35, "Volume": 99696500.0}, {"Date": "2025-04-15", "Open": 249.91, "High": 258.75, "Low": 247.54, "Close": 254.11, "Volume": 79070100.0}, {"Date": "2025-04-16", "Open": 247.61, "High": 251.97, "Low": 233.89, "Close": 241.55, "Volume": 111981100.0}, {"Date": "2025-04-17", "Open": 243.47, "High": 244.34, "Low": 237.68, "Close": 241.37, "Volume": 83204700.0}, {"Date": "2025-04-17", "Open": 243.4, "High": 244.34, "Low": 237.68, "Close": 241.37, "Volume": 82262821.0}, {"Date": "2025-04-21", "Open": 230.26, "High": 232.21, "Low": 222.79, "Close": 227.5, "Volume": 97230200.0}, {"Date": "2025-04-22", "Open": 230.96, "High": 242.79, "Low": 229.85, "Close": 237.97, "Volume": 117213200.0}, {"Date": "2025-04-23", "Open": 254.86, "High": 259.45, "Low": 244.43, "Close": 250.74, "Volume": 149859000.0}, {"Date": "2025-04-24", "Open": 250.5, "High": 259.54, "Low": 249.2, "Close": 259.51, "Volume": 93514300.0}, {"Date": "2025-04-25", "Open": 261.69, "High": 286.85, "Low": 259.63, "Close": 284.95, "Volume": 166129141.0}, {"Date": "2025-04-25", "Open": 261.69, "High": 286.85, "Low": 259.63, "Close": 284.95, "Volume": 167059300.0}, {"Date": "2025-04-28", "Open": 288.98, "High": 294.86, "Low": 272.42, "Close": 285.88, "Volume": 150957200.0}, {"Date": "2025-04-29", "Open": 285.5, "High": 293.32, "Low": 279.47, "Close": 292.03, "Volume": 108331700.0}, {"Date": "2025-04-30", "Open": 279.9, "High": 284.45, "Low": 270.78, "Close": 282.16, "Volume": 128334200.0}, {"Date": "2025-05-01", "Open": 280.01, "High": 290.87, "Low": 279.81, "Close": 280.52, "Volume": 99122500.0}, {"Date": "2025-05-02", "Open": 285.01, "High": 294.78, "Low": 279.81, "Close": 287.21, "Volume": 113807424.0}, {"Date": "2025-05-02", "Open": 284.9, "High": 294.78, "Low": 279.81, "Close": 287.21, "Volume": 114104900.0}, {"Date": "2025-05-05", "Open": 284.57, "High": 284.85, "Low": 274.4, "Close": 280.26, "Volume": 94346600.0}, {"Date": "2025-05-12", "Open": 321.93, "High": 322.2, "Low": 311.5, "Close": 318.38, "Volume": 112300787.0}, {"Date": "2025-05-13", "Open": 320.0, "High": 337.59, "Low": 316.8, "Close": 334.07, "Volume": 136378800.0}, {"Date": "2025-05-14", "Open": 342.5, "High": 350.0, "Low": 337.0, "Close": 347.68, "Volume": 136523400.0}, {"Date": "2025-05-15", "Open": 340.34, "High": 346.14, "Low": 334.72, "Close": 342.82, "Volume": 97631700.0}, {"Date": "2025-05-16", "Open": 346.07, "High": 351.62, "Low": 342.33, "Close": 349.98, "Volume": 90797726.0}, {"Date": "2025-05-16", "Open": 346.24, "High": 351.62, "Low": 342.33, "Close": 349.98, "Volume": 93811800.0}, {"Date": "2025-05-19", "Open": 336.3, "High": 343.0, "Low": 333.37, "Close": 342.09, "Volume": 88409800.0}, {"Date": "2025-05-20", "Open": 347.87, "High": 354.99, "Low": 341.63, "Close": 343.82, "Volume": 130932100.0}, {"Date": "2025-05-21", "Open": 344.43, "High": 347.35, "Low": 332.2, "Close": 334.62, "Volume": 101921300.0}, {"Date": "2025-05-22", "Open": 331.9, "High": 347.27, "Low": 331.39, "Close": 341.04, "Volume": 96761500.0}, {"Date": "2025-05-23", "Open": 337.52, "High": 343.18, "Low": 333.21, "Close": 339.34, "Volume": 84011168.0}, {"Date": "2025-05-23", "Open": 337.92, "High": 343.18, "Low": 333.21, "Close": 339.34, "Volume": 84439200.0}, {"Date": "2025-05-27", "Open": 347.35, "High": 363.79, "Low": 347.32, "Close": 362.89, "Volume": 118574100.0}, {"Date": "2025-05-28", "Open": 364.84, "High": 365.0, "Low": 355.91, "Close": 356.9, "Volume": 90186700.0}, {"Date": "2025-05-29", "Open": 365.29, "High": 367.71, "Low": 356.0, "Close": 358.43, "Volume": 88087800.0}, {"Date": "2025-05-30", "Open": 355.52, "High": 363.68, "Low": 345.29, "Close": 346.46, "Volume": 123097900.0}, {"Date": "2025-05-30", "Open": 355.58, "High": 363.68, "Low": 345.29, "Close": 346.46, "Volume": 122775188.0}, {"Date": "2025-06-02", "Open": 343.5, "High": 348.02, "Low": 333.33, "Close": 342.69, "Volume": 81569600.0}, {"Date": "2025-06-03", "Open": 346.6, "High": 355.4, "Low": 343.04, "Close": 344.27, "Volume": 98961200.0}, {"Date": "2025-06-04", "Open": 345.1, "High": 345.6, "Low": 327.33, "Close": 332.05, "Volume": 98125700.0}, {"Date": "2025-06-05", "Open": 322.49, "High": 324.55, "Low": 273.21, "Close": 284.7, "Volume": 287499800.0}, {"Date": "2025-06-06", "Open": 298.83, "High": 305.5, "Low": 291.14, "Close": 295.14, "Volume": 160927175.0}, {"Date": "2025-06-06", "Open": 298.83, "High": 305.5, "Low": 291.14, "Close": 295.14, "Volume": 163824100.0}, {"Date": "2025-06-09", "Open": 285.96, "High": 309.83, "Low": 281.85, "Close": 308.58, "Volume": 138958000.0}, {"Date": "2025-06-10", "Open": 314.94, "High": 327.83, "Low": 310.67, "Close": 326.09, "Volume": 150429600.0}, {"Date": "2025-06-11", "Open": 334.4, "High": 335.5, "Low": 322.5, "Close": 326.43, "Volume": 121851400.0}, {"Date": "2025-06-12", "Open": 323.08, "High": 332.56, "Low": 316.86, "Close": 319.11, "Volume": 104517500.0}, {"Date": "2025-06-13", "Open": 313.97, "High": 332.99, "Low": 313.3, "Close": 325.31, "Volume": 128495300.0}, {"Date": "2025-06-13", "Open": 314.0, "High": 332.98, "Low": 313.3, "Close": 325.31, "Volume": 128266351.0}, {"Date": "2025-06-16", "Open": 331.29, "High": 332.05, "Low": 326.41, "Close": 329.13, "Volume": 82965200.0}, {"Date": "2025-06-17", "Open": 326.09, "High": 327.26, "Low": 314.74, "Close": 316.35, "Volume": 87454300.0}, {"Date": "2025-06-18", "Open": 317.3, "High": 329.3, "Low": 315.45, "Close": 322.05, "Volume": 94307900.0}, {"Date": "2025-06-18", "Open": 317.31, "High": 329.32, "Low": 315.45, "Close": 322.05, "Volume": 94748400.0}, {"Date": "2025-06-20", "Open": 327.81, "High": 332.36, "Low": 317.85, "Close": 322.16, "Volume": 107635531.0}, {"Date": "2025-06-20", "Open": 327.95, "High": 332.36, "Low": 317.78, "Close": 322.16, "Volume": 108274100.0}, {"Date": "2025-06-23", "Open": 327.54, "High": 357.54, "Low": 327.48, "Close": 348.68, "Volume": 188609800.0}, {"Date": "2025-06-24", "Open": 356.17, "High": 356.26, "Low": 340.44, "Close": 340.47, "Volume": 114116900.0}, {"Date": "2025-06-25", "Open": 342.7, "High": 343.0, "Low": 320.4, "Close": 327.55, "Volume": 119446200.0}, {"Date": "2025-06-26", "Open": 324.61, "High": 331.05, "Low": 323.61, "Close": 325.78, "Volume": 80136100.0}, {"Date": "2025-06-27", "Open": 324.51, "High": 329.34, "Low": 317.5, "Close": 323.63, "Volume": 88826400.0}, {"Date": "2025-06-27", "Open": 324.47, "High": 329.34, "Low": 317.49, "Close": 323.63, "Volume": 88619492.0}, {"Date": "2025-06-30", "Open": 319.9, "High": 325.58, "Low": 316.6, "Close": 317.66, "Volume": 74472400.0}, {"Date": "2025-07-01", "Open": 298.46, "High": 305.89, "Low": 293.21, "Close": 300.71, "Volume": 144607600.0}, {"Date": "2025-07-02", "Open": 312.63, "High": 316.83, "Low": 303.82, "Close": 315.65, "Volume": 119191500.0}, {"Date": "2025-07-03", "Open": 317.99, "High": 318.45, "Low": 312.76, "Close": 315.35, "Volume": 58042300.0}, {"Date": "2025-07-03", "Open": 317.95, "High": 318.45, "Low": 312.76, "Close": 315.35, "Volume": 58042302.0}], "amazon": [{"Date": "2025-02-05", "Open": 237.02, "High": 238.32, "Low": 235.2, "Close": 236.17, "Volume": 38727300.0}, {"Date": "2025-02-06", "Open": 238.01, "High": 239.66, "Low": 236.01, "Close": 238.83, "Volume": 60072900.0}, {"Date": "2025-02-07", "Open": 232.5, "High": 234.81, "Low": 228.06, "Close": 229.15, "Volume": 77454000.0}, {"Date": "2025-02-07", "Open": 232.74, "High": 234.81, "Low": 228.07, "Close": 229.15, "Volume": 77324451.0}, {"Date": "2025-02-10", "Open": 230.55, "High": 233.92, "Low": 229.2, "Close": 233.14, "Volume": 35373700.0}, {"Date": "2025-02-11", "Open": 231.92, "High": 233.44, "Low": 230.13, "Close": 232.76, "Volume": 23681100.0}, {"Date": "2025-02-12", "Open": 230.46, "High": 231.18, "Low": 228.16, "Close": 228.93, "Volume": 32212400.0}, {"Date": "2025-02-13", "Open": 228.85, "High": 230.42, "Low": 227.52, "Close": 230.37, "Volume": 31292500.0}, {"Date": "2025-02-14", "Open": 229.2, "High": 229.89, "Low": 227.23, "Close": 228.68, "Volume": 26973200.0}, {"Date": "2025-02-14", "Open": 229.22, "High": 229.79, "Low": 227.23, "Close": 228.68, "Volume": 26365555.0}, {"Date": "2025-02-18", "Open": 228.82, "High": 229.3, "Low": 223.72, "Close": 226.65, "Volume": 42913900.0}, {"Date": "2025-02-19", "Open": 225.52, "High": 226.83, "Low": 223.71, "Close": 226.63, "Volume": 28517000.0}, {"Date": "2025-02-20", "Open": 224.78, "High": 225.13, "Low": 221.81, "Close": 222.88, "Volume": 29896500.0}, {"Date": "2025-02-21", "Open": 223.28, "High": 223.31, "Low": 214.74, "Close": 216.58, "Volume": 55161000.0}, {"Date": "2025-02-21", "Open": 223.24, "High": 223.31, "Low": 214.74, "Close": 216.58, "Volume": 54718036.0}, {"Date": "2025-02-24", "Open": 217.45, "High": 217.72, "Low": 212.42, "Close": 212.71, "Volume": 42277000.0}, {"Date": "2025-02-25", "Open": 211.63, "High": 213.34, "Low": 204.16, "Close": 212.8, "Volume": 58850500.0}, {"Date": "2025-02-26", "Open": 214.94, "High": 218.16, "Low": 213.09, "Close": 214.35, "Volume": 39037100.0}, {"Date": "2025-02-27", "Open": 218.35, "High": 219.97, "Low": 208.37, "Close": 208.74, "Volume": 40438500.0}, {"Date": "2025-02-28", "Open": 208.65, "High": 212.62, "Low": 206.99, "Close": 212.28, "Volume": 51715400.0}, {"Date": "2025-02-28", "Open": 209.08, "High": 212.62, "Low": 206.99, "Close": 212.28, "Volume": 50485372.0}, {"Date": "2025-03-03", "Open": 213.35, "High": 214.01, "Low": 202.55, "Close": 205.02, "Volume": 42843000.0}, {"Date": "2025-03-04", "Open": 200.11, "High": 206.8, "Low": 197.43, "Close": 203.8, "Volume": 60714200.0}, {"Date": "2025-03-05", "Open": 204.8, "High": 209.98, "Low": 203.26, "Close": 208.36, "Volume": 38575100.0}, {"Date": "2025-03-06", "Open": 204.4, "High": 205.77, "Low": 198.3, "Close": 200.7, "Volume": 49733400.0}, {"Date": "2025-03-07", "Open": 199.49, "High": 202.27, "Low": 192.53, "Close": 199.25, "Volume": 59756500.0}, {"Date": "2025-03-07", "Open": 199.5, "High": 202.27, "Low": 192.54, "Close": 199.25, "Volume": 58585210.0}, {"Date": "2025-03-10", "Open": 195.6, "High": 196.73, "Low": 190.85, "Close": 194.54, "Volume": 62061200.0}, {"Date": "2025-03-11", "Open": 193.9, "High": 200.18, "Low": 193.4, "Close": 196.59, "Volume": 52387000.0}, {"Date": "2025-03-12", "Open": 200.72, "High": 201.52, "Low": 195.29, "Close": 198.89, "Volume": 43592200.0}, {"Date": "2025-03-13", "Open": 198.17, "High": 198.88, "Low": 191.82, "Close": 193.89, "Volume": 41145100.0}, {"Date": "2025-03-14", "Open": 197.38, "High": 198.65, "Low": 195.32, "Close": 197.95, "Volume": 36642483.0}, {"Date": "2025-03-14", "Open": 197.41, "High": 198.65, "Low": 195.32, "Close": 197.95, "Volume": 38050600.0}, {"Date": "2025-03-17", "Open": 198.77, "High": 199.0, "Low": 194.32, "Close": 195.74, "Volume": 47283400.0}, {"Date": "2025-03-18", "Open": 192.52, "High": 194.0, "Low": 189.38, "Close": 192.82, "Volume": 40355500.0}, {"Date": "2025-03-19", "Open": 193.38, "High": 195.97, "Low": 191.96, "Close": 195.54, "Volume": 39334200.0}, {"Date": "2025-03-20", "Open": 193.07, "High": 199.32, "Low": 192.3, "Close": 194.95, "Volume": 38861300.0}, {"Date": "2025-03-21", "Open": 192.9, "High": 196.99, "Low": 192.52, "Close": 196.21, "Volume": 60005300.0}, {"Date": "2025-03-21", "Open": 192.88, "High": 196.81, "Low": 192.52, "Close": 196.21, "Volume": 59957952.0}, {"Date": "2025-03-24", "Open": 200.0, "High": 203.64, "Low": 199.95, "Close": 203.26, "Volume": 41550100.0}, {"Date": "2025-03-25", "Open": 203.6, "High": 206.21, "Low": 203.22, "Close": 205.71, "Volume": 31127800.0}, {"Date": "2025-03-26", "Open": 205.84, "High": 206.01, "Low": 199.93, "Close": 201.13, "Volume": 32855300.0}, {"Date": "2025-03-27", "Open": 200.89, "High": 203.79, "Low": 199.28, "Close": 201.36, "Volume": 27276500.0}, {"Date": "2025-03-28", "Open": 198.42, "High": 199.26, "Low": 191.88, "Close": 192.72, "Volume": 52146679.0}, {"Date": "2025-03-28", "Open": 198.42, "High": 199.26, "Low": 191.88, "Close": 192.72, "Volume": 52462100.0}, {"Date": "2025-03-31", "Open": 188.19, "High": 191.33, "Low": 184.4, "Close": 190.26, "Volume": 63489900.0}, {"Date": "2025-04-01", "Open": 187.86, "High": 193.93, "Low": 187.2, "Close": 192.17, "Volume": 41208500.0}, {"Date": "2025-04-02", "Open": 187.66, "High": 198.34, "Low": 187.66, "Close": 196.01, "Volume": 53032100.0}, {"Date": "2025-04-03", "Open": 183.0, "High": 184.13, "Low": 176.92, "Close": 178.41, "Volume": 95331300.0}, {"Date": "2025-04-04", "Open": 167.15, "High": 178.14, "Low": 166.0, "Close": 171.0, "Volume": 122951300.0}, {"Date": "2025-04-04", "Open": 167.15, "High": 178.14, "Low": 166.0, "Close": 171.0, "Volume": 118861321.0}, {"Date": "2025-04-08", "Open": 185.23, "High": 185.9, "Low": 168.57, "Close": 170.66, "Volume": 87450700.0}, {"Date": "2025-04-09", "Open": 172.12, "High": 192.65, "Low": 169.93, "Close": 191.1, "Volume": 116568400.0}, {"Date": "2025-04-10", "Open": 185.44, "High": 186.87, "Low": 175.85, "Close": 181.22, "Volume": 68082500.0}, {"Date": "2025-04-11", "Open": 179.93, "High": 185.86, "Low": 178.0, "Close": 184.87, "Volume": 50542500.0}, {"Date": "2025-04-11", "Open": 179.99, "High": 185.86, "Low": 178.0, "Close": 184.87, "Volume": 50040883.0}, {"Date": "2025-04-14", "Open": 186.84, "High": 187.44, "Low": 179.23, "Close": 182.12, "Volume": 47937000.0}, {"Date": "2025-04-15", "Open": 181.41, "High": 182.35, "Low": 177.93, "Close": 179.59, "Volume": 43493000.0}, {"Date": "2025-04-16", "Open": 176.29, "High": 179.1, "Low": 171.41, "Close": 174.33, "Volume": 51782200.0}, {"Date": "2025-04-17", "Open": 176.0, "High": 176.21, "Low": 172.0, "Close": 172.61, "Volume": 44148292.0}, {"Date": "2025-04-17", "Open": 176.0, "High": 176.21, "Low": 172.0, "Close": 172.61, "Volume": 44468400.0}, {"Date": "2025-04-21", "Open": 169.6, "High": 169.6, "Low": 165.29, "Close": 167.32, "Volume": 47989800.0}, {"Date": "2025-04-22", "Open": 169.85, "High": 176.78, "Low": 169.35, "Close": 173.18, "Volume": 54364800.0}, {"Date": "2025-04-23", "Open": 183.45, "High": 187.38, "Low": 180.19, "Close": 180.6, "Volume": 63209700.0}, {"Date": "2025-04-24", "Open": 180.92, "High": 186.74, "Low": 180.18, "Close": 186.54, "Volume": 43586000.0}, {"Date": "2025-04-25", "Open": 187.62, "High": 189.94, "Low": 185.49, "Close": 188.99, "Volume": 36364100.0}, {"Date": "2025-04-25", "Open": 187.68, "High": 189.94, "Low": 185.5, "Close": 188.99, "Volume": 36189010.0}, {"Date": "2025-04-28", "Open": 190.11, "High": 190.22, "Low": 184.89, "Close": 187.7, "Volume": 33130300.0}, {"Date": "2025-04-29", "Open": 183.99, "High": 188.02, "Low": 183.68, "Close": 187.39, "Volume": 41591100.0}, {"Date": "2025-04-30", "Open": 182.17, "High": 185.05, "Low": 178.85, "Close": 184.42, "Volume": 54771700.0}, {"Date": "2025-05-01", "Open": 190.63, "High": 191.81, "Low": 187.5, "Close": 190.2, "Volume": 73254700.0}, {"Date": "2025-05-02", "Open": 191.44, "High": 192.88, "Low": 186.4, "Close": 189.98, "Volume": 77809300.0}, {"Date": "2025-05-02", "Open": 191.49, "High": 192.88, "Low": 186.4, "Close": 189.98, "Volume": 77533090.0}, {"Date": "2025-05-05", "Open": 186.51, "High": 188.18, "Low": 185.53, "Close": 186.35, "Volume": 35161600.0}, {"Date": "2025-05-12", "Open": 210.54, "High": 211.66, "Low": 205.75, "Close": 208.64, "Volume": 73707088.0}, {"Date": "2025-05-13", "Open": 211.08, "High": 214.84, "Low": 210.1, "Close": 211.37, "Volume": 56029700.0}, {"Date": "2025-05-14", "Open": 211.45, "High": 211.93, "Low": 208.85, "Close": 210.25, "Volume": 38334500.0}, {"Date": "2025-05-15", "Open": 206.45, "High": 206.88, "Low": 202.67, "Close": 205.17, "Volume": 64290800.0}, {"Date": "2025-05-16", "Open": 206.85, "High": 206.85, "Low": 204.37, "Close": 205.59, "Volume": 43072700.0}, {"Date": "2025-05-16", "Open": 206.85, "High": 206.85, "Low": 204.37, "Close": 205.59, "Volume": 42141065.0}, {"Date": "2025-05-19", "Open": 201.65, "High": 206.62, "Low": 201.26, "Close": 206.16, "Volume": 34242400.0}, {"Date": "2025-05-20", "Open": 204.63, "High": 205.59, "Low": 202.65, "Close": 204.07, "Volume": 29413500.0}, {"Date": "2025-05-21", "Open": 201.61, "High": 203.46, "Low": 200.06, "Close": 201.12, "Volume": 42395800.0}, {"Date": "2025-05-22", "Open": 201.38, "High": 205.76, "Low": 200.16, "Close": 203.1, "Volume": 38830200.0}, {"Date": "2025-05-23", "Open": 198.9, "High": 202.37, "Low": 197.85, "Close": 200.99, "Volume": 32914337.0}, {"Date": "2025-05-23", "Open": 198.9, "High": 202.37, "Low": 197.85, "Close": 200.99, "Volume": 33350500.0}, {"Date": "2025-05-27", "Open": 203.09, "High": 206.69, "Low": 202.19, "Close": 206.02, "Volume": 34843100.0}, {"Date": "2025-05-28", "Open": 205.92, "High": 207.66, "Low": 204.41, "Close": 204.72, "Volume": 27733700.0}, {"Date": "2025-05-29", "Open": 208.03, "High": 208.81, "Low": 204.23, "Close": 205.7, "Volume": 34650000.0}, {"Date": "2025-05-30", "Open": 204.84, "High": 205.99, "Low": 201.7, "Close": 205.01, "Volume": 51649600.0}, {"Date": "2025-05-30", "Open": 204.77, "High": 205.99, "Low": 201.7, "Close": 205.01, "Volume": 50837119.0}, {"Date": "2025-06-02", "Open": 204.98, "High": 207.0, "Low": 202.68, "Close": 206.65, "Volume": 29048100.0}, {"Date": "2025-06-03", "Open": 207.11, "High": 208.95, "Low": 205.03, "Close": 205.71, "Volume": 33087900.0}, {"Date": "2025-06-04", "Open": 206.55, "High": 208.18, "Low": 205.18, "Close": 207.23, "Volume": 29866400.0}, {"Date": "2025-06-05", "Open": 209.55, "High": 212.81, "Low": 207.56, "Close": 207.91, "Volume": 51864200.0}, {"Date": "2025-06-06", "Open": 212.4, "High": 213.87, "Low": 210.5, "Close": 213.57, "Volume": 39769900.0}, {"Date": "2025-06-06", "Open": 212.41, "High": 213.87, "Low": 210.5, "Close": 213.57, "Volume": 39720435.0}, {"Date": "2025-06-09", "Open": 214.75, "High": 217.85, "Low": 212.88, "Close": 216.98, "Volume": 38043100.0}, {"Date": "2025-06-10", "Open": 216.78, "High": 217.69, "Low": 214.15, "Close": 217.61, "Volume": 31242500.0}, {"Date": "2025-06-11", "Open": 217.41, "High": 218.4, "Low": 212.89, "Close": 213.2, "Volume": 39218800.0}, {"Date": "2025-06-12", "Open": 211.78, "High": 213.58, "Low": 211.33, "Close": 213.24, "Volume": 27540600.0}, {"Date": "2025-06-13", "Open": 209.96, "High": 214.05, "Low": 209.62, "Close": 212.1, "Volume": 29300100.0}, {"Date": "2025-06-13", "Open": 209.96, "High": 214.05, "Low": 209.66, "Close": 212.1, "Volume": 29278801.0}, {"Date": "2025-06-16", "Open": 212.31, "High": 217.06, "Low": 211.6, "Close": 216.1, "Volume": 33128100.0}, {"Date": "2025-06-17", "Open": 215.2, "High": 217.41, "Low": 214.56, "Close": 214.82, "Volume": 32009100.0}, {"Date": "2025-06-18", "Open": 215.09, "High": 217.96, "Low": 212.34, "Close": 212.52, "Volume": 44181988.0}, {"Date": "2025-06-18", "Open": 215.09, "High": 217.96, "Low": 212.34, "Close": 212.52, "Volume": 44260800.0}, {"Date": "2025-06-20", "Open": 214.68, "High": 214.89, "Low": 208.27, "Close": 209.69, "Volume": 75297800.0}, {"Date": "2025-06-20", "Open": 214.49, "High": 214.89, "Low": 208.27, "Close": 209.69, "Volume": 75063021.0}, {"Date": "2025-06-23", "Open": 209.79, "High": 210.39, "Low": 207.31, "Close": 208.47, "Volume": 36934900.0}, {"Date": "2025-06-24", "Open": 212.14, "High": 214.34, "Low": 211.05, "Close": 212.77, "Volume": 38338200.0}, {"Date": "2025-06-25", "Open": 214.62, "High": 216.03, "Low": 211.11, "Close": 211.99, "Volume": 31690000.0}, {"Date": "2025-06-26", "Open": 213.12, "High": 218.04, "Low": 212.01, "Close": 217.12, "Volume": 50387600.0}, {"Date": "2025-06-27", "Open": 219.92, "High": 223.3, "Low": 216.74, "Close": 223.3, "Volume": 119122800.0}, {"Date": "2025-06-27", "Open": 219.92, "High": 223.3, "Low": 216.74, "Close": 223.3, "Volume": 106482541.0}, {"Date": "2025-06-30", "Open": 223.52, "High": 223.82, "Low": 219.12, "Close": 219.39, "Volume": 58798200.0}, {"Date": "2025-07-01", "Open": 219.5, "High": 221.88, "Low": 217.93, "Close": 220.46, "Volume": 39200000.0}, {"Date": "2025-07-02", "Open": 219.73, "High": 221.6, "Low": 219.06, "Close": 219.92, "Volume": 30840800.0}, {"Date": "2025-07-03", "Open": 221.82, "High": 224.01, "Low": 221.36, "Close": 223.41, "Volume": 29632400.0}, {"Date": "2025-07-03", "Open": 221.71, "High": 224.01, "Low": 221.36, "Close": 223.41, "Volume": 29295154.0}], "google": [{"Date": "2025-02-05", "Open": 191.07, "High": 192.75, "Low": 188.03, "Close": 191.33, "Volume": 70373900.0}, {"Date": "2025-02-06", "Open": 189.5, "High": 192.1, "Low": 188.72, "Close": 191.6, "Volume": 29247200.0}, {"Date": "2025-02-07", "Open": 191.05, "High": 191.18, "Low": 183.24, "Close": 185.34, "Volume": 49246800.0}, {"Date": "2025-02-07", "Open": 190.99, "High": 191.18, "Low": 183.24, "Close": 185.34, "Volume": 49083421.0}, {"Date": "2025-02-10", "Open": 187.35, "High": 188.2, "Low": 185.86, "Close": 186.47, "Volume": 23064200.0}, {"Date": "2025-02-11", "Open": 185.03, "High": 186.94, "Low": 184.28, "Close": 185.32, "Volume": 21215300.0}, {"Date": "2025-02-12", "Open": 183.22, "High": 185.11, "Low": 181.83, "Close": 183.61, "Volume": 22035300.0}, {"Date": "2025-02-13", "Open": 184.32, "High": 186.28, "Low": 183.14, "Close": 186.14, "Volume": 21355200.0}, {"Date": "2025-02-14", "Open": 185.06, "High": 186.4, "Low": 184.32, "Close": 185.23, "Volume": 20402300.0}, {"Date": "2025-02-14", "Open": 185.05, "High": 186.4, "Low": 184.32, "Close": 185.23, "Volume": 20390327.0}, {"Date": "2025-02-18", "Open": 185.6, "High": 185.96, "Low": 181.74, "Close": 183.77, "Volume": 29878700.0}, {"Date": "2025-02-19", "Open": 184.07, "High": 185.46, "Low": 183.59, "Close": 185.27, "Volume": 19529100.0}, {"Date": "2025-02-20", "Open": 184.8, "High": 185.31, "Low": 182.72, "Close": 184.56, "Volume": 20384200.0}, {"Date": "2025-02-21", "Open": 185.15, "High": 185.34, "Low": 179.08, "Close": 179.66, "Volume": 35109600.0}, {"Date": "2025-02-21", "Open": 185.18, "High": 185.34, "Low": 179.08, "Close": 179.66, "Volume": 35067453.0}, {"Date": "2025-02-24", "Open": 181.99, "High": 183.12, "Low": 178.89, "Close": 179.25, "Volume": 29767500.0}, {"Date": "2025-02-25", "Open": 178.04, "High": 178.74, "Low": 174.69, "Close": 175.42, "Volume": 41861100.0}, {"Date": "2025-02-26", "Open": 175.07, "High": 176.08, "Low": 171.58, "Close": 172.73, "Volume": 35360400.0}, {"Date": "2025-02-27", "Open": 173.99, "High": 174.56, "Low": 167.94, "Close": 168.5, "Volume": 39922000.0}, {"Date": "2025-02-28", "Open": 168.63, "High": 170.6, "Low": 166.77, "Close": 170.28, "Volume": 44822719.0}, {"Date": "2025-02-28", "Open": 168.68, "High": 170.61, "Low": 166.77, "Close": 170.28, "Volume": 48086000.0}, {"Date": "2025-03-03", "Open": 171.93, "High": 173.37, "Low": 165.93, "Close": 167.01, "Volume": 40699800.0}, {"Date": "2025-03-04", "Open": 166.24, "High": 173.29, "Low": 165.8, "Close": 170.92, "Volume": 45331600.0}, {"Date": "2025-03-05", "Open": 170.52, "High": 173.78, "Low": 169.06, "Close": 173.02, "Volume": 30925300.0}, {"Date": "2025-03-06", "Open": 170.53, "High": 174.81, "Low": 170.5, "Close": 172.35, "Volume": 28225900.0}, {"Date": "2025-03-07", "Open": 171.26, "High": 174.97, "Low": 170.27, "Close": 173.86, "Volume": 27369400.0}, {"Date": "2025-03-07", "Open": 171.26, "High": 174.97, "Low": 170.27, "Close": 173.86, "Volume": 27236708.0}, {"Date": "2025-03-10", "Open": 168.26, "High": 168.46, "Low": 163.69, "Close": 165.87, "Volume": 43502900.0}, {"Date": "2025-03-11", "Open": 164.91, "High": 166.75, "Low": 161.37, "Close": 164.04, "Volume": 37720000.0}, {"Date": "2025-03-12", "Open": 166.58, "High": 167.64, "Low": 163.53, "Close": 167.11, "Volume": 28301800.0}, {"Date": "2025-03-13", "Open": 166.04, "High": 166.13, "Low": 162.11, "Close": 162.76, "Volume": 31711900.0}, {"Date": "2025-03-14", "Open": 163.27, "High": 165.94, "Low": 162.45, "Close": 165.49, "Volume": 31880528.0}, {"Date": "2025-03-14", "Open": 163.27, "High": 166.49, "Low": 162.45, "Close": 165.49, "Volume": 31970600.0}, {"Date": "2025-03-17", "Open": 165.03, "High": 166.3, "Low": 163.67, "Close": 164.29, "Volume": 31157900.0}, {"Date": "2025-03-18", "Open": 163.68, "High": 164.25, "Low": 156.72, "Close": 160.67, "Volume": 42031100.0}, {"Date": "2025-03-19", "Open": 161.76, "High": 165.87, "Low": 161.0, "Close": 163.89, "Volume": 34233600.0}, {"Date": "2025-03-20", "Open": 161.57, "High": 164.89, "Low": 160.96, "Close": 162.8, "Volume": 28104400.0}, {"Date": "2025-03-21", "Open": 161.21, "High": 164.24, "Low": 160.89, "Close": 163.99, "Volume": 36382369.0}, {"Date": "2025-03-21", "Open": 161.21, "High": 164.24, "Low": 160.89, "Close": 163.99, "Volume": 36581500.0}, {"Date": "2025-03-24", "Open": 167.07, "High": 168.32, "Low": 165.14, "Close": 167.68, "Volume": 30849700.0}, {"Date": "2025-03-25", "Open": 168.98, "High": 170.63, "Low": 168.32, "Close": 170.56, "Volume": 24143700.0}, {"Date": "2025-03-26", "Open": 169.0, "High": 169.61, "Low": 164.84, "Close": 165.06, "Volume": 28901600.0}, {"Date": "2025-03-27", "Open": 164.63, "High": 165.42, "Low": 162.0, "Close": 162.24, "Volume": 24472800.0}, {"Date": "2025-03-28", "Open": 160.62, "High": 161.82, "Low": 153.63, "Close": 154.33, "Volume": 47599600.0}, {"Date": "2025-03-28", "Open": 160.49, "High": 161.82, "Low": 153.63, "Close": 154.33, "Volume": 48623600.0}, {"Date": "2025-03-31", "Open": 153.11, "High": 155.54, "Low": 150.66, "Close": 154.64, "Volume": 54567200.0}, {"Date": "2025-04-01", "Open": 153.62, "High": 158.1, "Low": 153.62, "Close": 157.07, "Volume": 30647000.0}, {"Date": "2025-04-02", "Open": 155.15, "High": 158.41, "Low": 154.7, "Close": 157.04, "Volume": 24774200.0}, {"Date": "2025-04-03", "Open": 151.11, "High": 152.78, "Low": 150.39, "Close": 150.72, "Volume": 46779600.0}, {"Date": "2025-04-04", "Open": 148.18, "High": 151.05, "Low": 145.39, "Close": 145.6, "Volume": 62058272.0}, {"Date": "2025-04-04", "Open": 148.01, "High": 151.07, "Low": 145.38, "Close": 145.6, "Volume": 62138600.0}, {"Date": "2025-04-08", "Open": 151.22, "High": 152.24, "Low": 143.03, "Close": 144.7, "Volume": 52083900.0}, {"Date": "2025-04-09", "Open": 144.42, "High": 159.55, "Low": 143.91, "Close": 158.71, "Volume": 70308700.0}, {"Date": "2025-04-10", "Open": 156.54, "High": 157.72, "Low": 149.93, "Close": 152.82, "Volume": 47958400.0}, {"Date": "2025-04-11", "Open": 152.9, "High": 157.67, "Low": 152.82, "Close": 157.14, "Volume": 33595900.0}, {"Date": "2025-04-11", "Open": 152.94, "High": 157.63, "Low": 152.89, "Close": 157.14, "Volume": 33326722.0}, {"Date": "2025-04-14", "Open": 160.0, "High": 161.72, "Low": 157.56, "Close": 159.07, "Volume": 30305500.0}, {"Date": "2025-04-15", "Open": 159.13, "High": 159.65, "Low": 155.21, "Close": 156.31, "Volume": 27485000.0}, {"Date": "2025-04-16", "Open": 153.1, "High": 155.89, "Low": 151.51, "Close": 153.33, "Volume": 28170100.0}, {"Date": "2025-04-17", "Open": 154.21, "High": 154.68, "Low": 148.5, "Close": 151.16, "Volume": 32914863.0}, {"Date": "2025-04-17", "Open": 154.29, "High": 154.68, "Low": 148.5, "Close": 151.16, "Volume": 32938500.0}, {"Date": "2025-04-21", "Open": 148.88, "High": 148.95, "Low": 146.1, "Close": 147.67, "Volume": 26012000.0}, {"Date": "2025-04-22", "Open": 148.89, "High": 152.19, "Low": 148.54, "Close": 151.47, "Volume": 26531900.0}, {"Date": "2025-04-23", "Open": 155.61, "High": 157.53, "Low": 153.81, "Close": 155.35, "Volume": 31096400.0}, {"Date": "2025-04-24", "Open": 156.15, "High": 159.59, "Low": 155.79, "Close": 159.28, "Volume": 45503700.0}, {"Date": "2025-04-25", "Open": 165.07, "High": 166.1, "Low": 161.04, "Close": 161.96, "Volume": 55972600.0}, {"Date": "2025-04-25", "Open": 165.04, "High": 166.1, "Low": 161.04, "Close": 161.96, "Volume": 55921436.0}, {"Date": "2025-04-28", "Open": 162.43, "High": 163.15, "Low": 158.6, "Close": 160.61, "Volume": 29701100.0}, {"Date": "2025-04-29", "Open": 160.32, "High": 160.74, "Low": 157.52, "Close": 160.16, "Volume": 26778000.0}, {"Date": "2025-04-30", "Open": 157.98, "High": 159.27, "Low": 155.4, "Close": 158.8, "Volume": 34776600.0}, {"Date": "2025-05-01", "Open": 160.45, "High": 161.95, "Low": 158.91, "Close": 161.3, "Volume": 30113800.0}, {"Date": "2025-05-02", "Open": 163.4, "High": 164.97, "Low": 161.87, "Close": 164.03, "Volume": 25459184.0}, {"Date": "2025-05-02", "Open": 163.41, "High": 164.97, "Low": 161.87, "Close": 164.03, "Volume": 25693800.0}, {"Date": "2025-05-05", "Open": 163.0, "High": 165.39, "Low": 162.72, "Close": 164.21, "Volume": 21326000.0}, {"Date": "2025-05-12", "Open": 157.53, "High": 159.1, "Low": 156.25, "Close": 158.46, "Volume": 43754064.0}, {"Date": "2025-05-13", "Open": 158.79, "High": 160.57, "Low": 156.16, "Close": 159.53, "Volume": 42293000.0}, {"Date": "2025-05-14", "Open": 159.96, "High": 167.0, "Low": 159.61, "Close": 165.37, "Volume": 48671500.0}, {"Date": "2025-05-15", "Open": 165.84, "High": 166.21, "Low": 162.37, "Close": 163.96, "Volume": 33091900.0}, {"Date": "2025-05-16", "Open": 167.65, "High": 169.34, "Low": 165.62, "Close": 166.19, "Volume": 42262455.0}, {"Date": "2025-05-16", "Open": 167.73, "High": 169.35, "Low": 165.62, "Close": 166.19, "Volume": 42650100.0}, {"Date": "2025-05-19", "Open": 164.51, "High": 166.64, "Low": 164.22, "Close": 166.54, "Volume": 30363600.0}, {"Date": "2025-05-20", "Open": 166.43, "High": 168.5, "Low": 162.9, "Close": 163.98, "Volume": 46530600.0}, {"Date": "2025-05-21", "Open": 163.69, "High": 173.14, "Low": 163.56, "Close": 168.56, "Volume": 73299700.0}, {"Date": "2025-05-22", "Open": 171.85, "High": 176.77, "Low": 170.71, "Close": 170.87, "Volume": 74770600.0}, {"Date": "2025-05-23", "Open": 169.11, "High": 169.96, "Low": 167.89, "Close": 168.47, "Volume": 35145418.0}, {"Date": "2025-05-23", "Open": 169.06, "High": 169.96, "Low": 167.89, "Close": 168.47, "Volume": 35181400.0}, {"Date": "2025-05-27", "Open": 170.16, "High": 173.17, "Low": 170.0, "Close": 172.9, "Volume": 37959500.0}, {"Date": "2025-05-28", "Open": 173.16, "High": 175.27, "Low": 171.91, "Close": 172.36, "Volume": 34492000.0}, {"Date": "2025-05-29", "Open": 174.0, "High": 174.42, "Low": 170.63, "Close": 171.86, "Volume": 29317300.0}, {"Date": "2025-05-30", "Open": 171.36, "High": 172.21, "Low": 167.45, "Close": 171.74, "Volume": 50692552.0}, {"Date": "2025-05-30", "Open": 171.35, "High": 172.21, "Low": 167.44, "Close": 171.74, "Volume": 52605000.0}, {"Date": "2025-06-02", "Open": 167.84, "High": 169.87, "Low": 167.39, "Close": 169.03, "Volume": 38532600.0}, {"Date": "2025-06-03", "Open": 167.49, "High": 168.48, "Low": 165.28, "Close": 166.18, "Volume": 45031900.0}, {"Date": "2025-06-04", "Open": 166.74, "High": 168.22, "Low": 166.36, "Close": 168.05, "Volume": 26868900.0}, {"Date": "2025-06-05", "Open": 170.34, "High": 170.93, "Low": 167.59, "Close": 168.21, "Volume": 36379100.0}, {"Date": "2025-06-06", "Open": 170.96, "High": 174.5, "Low": 170.95, "Close": 173.68, "Volume": 35440393.0}, {"Date": "2025-06-06", "Open": 170.83, "High": 174.5, "Low": 170.83, "Close": 173.68, "Volume": 35708300.0}, {"Date": "2025-06-09", "Open": 174.54, "High": 176.47, "Low": 174.37, "Close": 176.09, "Volume": 28894300.0}, {"Date": "2025-06-10", "Open": 176.2, "High": 181.11, "Low": 174.91, "Close": 178.6, "Volume": 61713300.0}, {"Date": "2025-06-11", "Open": 179.77, "High": 180.37, "Low": 176.75, "Close": 177.35, "Volume": 31607800.0}, {"Date": "2025-06-12", "Open": 176.18, "High": 176.72, "Low": 174.75, "Close": 175.7, "Volume": 20892800.0}, {"Date": "2025-06-13", "Open": 172.44, "High": 177.13, "Low": 172.38, "Close": 174.67, "Volume": 27594804.0}, {"Date": "2025-06-13", "Open": 172.44, "High": 177.13, "Low": 172.39, "Close": 174.67, "Volume": 27641100.0}, {"Date": "2025-06-16", "Open": 174.73, "High": 176.94, "Low": 174.65, "Close": 176.77, "Volume": 27328800.0}, {"Date": "2025-06-17", "Open": 175.7, "High": 177.36, "Low": 174.58, "Close": 175.95, "Volume": 24946300.0}, {"Date": "2025-06-18", "Open": 175.98, "High": 176.56, "Low": 173.2, "Close": 173.32, "Volume": 28495733.0}, {"Date": "2025-06-18", "Open": 176.01, "High": 176.56, "Low": 173.2, "Close": 173.32, "Volume": 28657500.0}, {"Date": "2025-06-20", "Open": 173.95, "High": 174.34, "Low": 165.46, "Close": 166.64, "Volume": 74623380.0}, {"Date": "2025-06-20", "Open": 173.95, "High": 174.34, "Low": 165.46, "Close": 166.64, "Volume": 75247800.0}, {"Date": "2025-06-23", "Open": 166.27, "High": 167.34, "Low": 162.0, "Close": 165.19, "Volume": 57378200.0}, {"Date": "2025-06-24", "Open": 166.92, "High": 168.22, "Low": 166.13, "Close": 166.77, "Volume": 40457100.0}, {"Date": "2025-06-25", "Open": 167.63, "High": 172.36, "Low": 167.55, "Close": 170.68, "Volume": 35438700.0}, {"Date": "2025-06-26", "Open": 172.43, "High": 173.69, "Low": 169.94, "Close": 173.54, "Volume": 31729500.0}, {"Date": "2025-06-27", "Open": 173.54, "High": 178.68, "Low": 171.73, "Close": 178.53, "Volume": 108022600.0}, {"Date": "2025-06-27", "Open": 173.52, "High": 178.68, "Low": 171.73, "Close": 178.53, "Volume": 98345162.0}, {"Date": "2025-06-30", "Open": 180.78, "High": 181.23, "Low": 174.58, "Close": 176.23, "Volume": 63313600.0}, {"Date": "2025-07-01", "Open": 175.74, "High": 176.09, "Low": 173.53, "Close": 175.84, "Volume": 35869600.0}, {"Date": "2025-07-02", "Open": 175.54, "High": 178.86, "Low": 175.07, "Close": 178.64, "Volume": 29100000.0}, {"Date": "2025-07-03", "Open": 178.5, "High": 179.67, "Low": 177.05, "Close": 179.53, "Volume": 21689700.0}, {"Date": "2025-07-03", "Open": 178.7, "High": 179.67, "Low": 177.06, "Close": 179.53, "Volume": 21563145.0}]}};
+const brand = RAW.brand;
+const tsData = RAW.ts;
+const indData = RAW.ind;
+const ctrData = RAW.ctr;
+const glData  = RAW.gl;
+const candles = RAW.candles;
+
+const COLORS = {
+  green: '#00d97e', red: '#ff4560', cyan: '#00b4d8',
+  gold: '#f4b942', purple: '#a855f7', orange: '#fb923c',
+  teal: '#2dd4bf', pink: '#f472b6', blue: '#60a5fa',
+  lime: '#a3e635', indigo: '#818cf8', amber: '#fbbf24',
+};
+const IND_COLORS = [
+  '#00b4d8','#00d97e','#ff4560','#f4b942','#a855f7','#fb923c',
+  '#2dd4bf','#f472b6','#60a5fa','#a3e635','#818cf8','#fbbf24',
+  '#34d399','#f87171','#c084fc','#38bdf8','#fcd34d','#86efac',
+  '#fb7185','#67e8f9','#d946ef','#4ade80','#facc15'
+];
+
+// Chart defaults
+Chart.defaults.color = '#8ba3c7';
+Chart.defaults.borderColor = '#1e2d45';
+Chart.defaults.font.family = "'DM Sans', sans-serif";
+Chart.defaults.plugins.legend.display = false;
+Chart.defaults.plugins.tooltip.backgroundColor = '#1a2540';
+Chart.defaults.plugins.tooltip.borderColor = '#243352';
+Chart.defaults.plugins.tooltip.borderWidth = 1;
+Chart.defaults.plugins.tooltip.titleFont = { family: "'Space Mono', monospace", size: 10 };
+Chart.defaults.plugins.tooltip.bodyFont = { family: "'Space Mono', monospace", size: 10 };
+Chart.defaults.plugins.tooltip.padding = 10;
+
+// ══════════════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════════════
+const charts = {};
+function showPage(id, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ══════════════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════════════
+function fmt(n, dec=2) {
+  if(Math.abs(n) >= 1e9) return (n/1e9).toFixed(1)+'B';
+  if(Math.abs(n) >= 1e6) return (n/1e6).toFixed(1)+'M';
+  if(Math.abs(n) >= 1e3) return (n/1e3).toFixed(1)+'K';
+  return n.toFixed(dec);
+}
+function capitalize(s){ return s ? s.charAt(0).toUpperCase()+s.slice(1) : s; }
+function titleCase(s){ return s ? s.replace(/\b\w/g, c=>c.toUpperCase()) : s; }
+
+// ══════════════════════════════════════════════
+// PAGE 1 — KPI CARDS
+// ══════════════════════════════════════════════
+function renderKpis() {
+  const kpis = [
+    { label:'Total Companies', value:'61', sub:'Across 7 countries', accent:'var(--cyan)' },
+    { label:'Total Industries', value:'23', sub:'Diverse sectors', accent:'var(--gold)' },
+    { label:'Total Countries', value:'7', sub:'Global markets', accent:'var(--purple, #a855f7)' },
+    { label:'Avg Closing Price', value:'$76.74', sub:'All-time average', accent:'var(--cyan)' },
+    { label:'Avg Daily Return', value:'+0.042%', sub:'Per trading day', accent:'var(--green)', cls:'kpi-positive' },
+    { label:'Highest Stock', value:'$3,427', sub:'Chipotle (2024)', accent:'var(--green)' },
+    { label:'Avg Daily Volume', value:'22.9M', sub:'Shares per day', accent:'var(--gold)' },
+    { label:'Bullish Days', value:'49.9%', sub:'153,269 sessions', accent:'var(--green)' },
+    { label:'Bearish Days', value:'50.1%', sub:'153,764 sessions', accent:'var(--red)' },
+    { label:'Total Records', value:'307K', sub:'Daily observations', accent:'var(--cyan)' },
+  ];
+  const grid = document.getElementById('kpiGrid');
+  grid.innerHTML = kpis.map(k => `
+    <div class="kpi-card" style="--accent:${k.accent}">
+      <div class="kpi-label">${k.label}</div>
+      <div class="kpi-value ${k.cls||''}">${k.value}</div>
+      <div class="kpi-sub">${k.sub}</div>
+    </div>`).join('');
+}
+
+// ══════════════════════════════════════════════
+// PAGE 1 — GAINERS / LOSERS CHARTS
+// ══════════════════════════════════════════════
+function renderGainersLosers() {
+  const gainers = glData.gainers;
+  const losers  = glData.losers;
+
+  const makeBar = (canvasId, data, colorFn) => {
+    const labels = data.map(d => titleCase(d.Brand_Name));
+    const values = data.map(d => d.avg_return);
+    if(charts[canvasId]) charts[canvasId].destroy();
+    charts[canvasId] = new Chart(document.getElementById(canvasId), {
+      type:'bar',
+      data:{
+        labels,
+        datasets:[{
+          data: values,
+          backgroundColor: data.map(colorFn),
+          borderRadius: 4,
+          barPercentage: .7,
+        }]
+      },
+      options:{
+        indexAxis:'y',
+        responsive:true,
+        maintainAspectRatio:false,
+        plugins:{ tooltip:{ callbacks:{
+          label: ctx => ` ${ctx.raw.toFixed(4)}%`
+        }}},
+        scales:{
+          x:{ grid:{color:'rgba(30,45,69,.5)'}, ticks:{ callback: v=>v.toFixed(3)+'%' } },
+          y:{ grid:{display:false}, ticks:{font:{size:11}} }
+        }
+      }
+    });
+  };
+  makeBar('gainersChart', gainers, () => COLORS.green);
+  makeBar('losersChart',  losers,  d => d.avg_return < 0 ? COLORS.red : COLORS.gold);
+}
+
+// ══════════════════════════════════════════════
+// PAGE 1 — BUBBLE ALL STOCKS
+// ══════════════════════════════════════════════
+function renderBubbleAll() {
+  const indList = [...new Set(brand.map(b=>b.Industry_Type))];
+  const datasets = indList.map((ind,i) => {
+    const stocks = brand.filter(b=>b.Industry_Type===ind);
+    return {
+      label: ind,
+      data: stocks.map(s=>({
+        x: s.volatility,
+        y: s.avg_return,
+        r: Math.max(4, Math.min(20, Math.log10(s.avg_volume+1)*2)),
+        label: s.Brand_Name, ticker: s.Ticker
+      })),
+      backgroundColor: IND_COLORS[i]+'99',
+      borderColor: IND_COLORS[i],
+      borderWidth: 1,
+    };
+  });
+  if(charts.bubbleAll) charts.bubbleAll.destroy();
+  charts.bubbleAll = new Chart(document.getElementById('bubbleAll'), {
+    type:'bubble',
+    data:{ datasets },
+    options:{
+      maintainAspectRatio:false,
+      responsive:true,
+      plugins:{
+        legend:{ display:true, position:'right',
+          labels:{ color:'#8ba3c7', font:{size:10,family:"'Space Mono'"}, boxWidth:10, padding:10 }},
+        tooltip:{ callbacks:{
+          label: ctx=>{
+            const d=ctx.raw;
+            return [`${titleCase(d.label)} (${d.ticker})`,
+                    `Return: ${d.y.toFixed(4)}%`,
+                    `Volatility: ${d.x.toFixed(2)}`];
+          }
+        }}
+      },
+      scales:{
+        x:{ title:{display:true,text:'Volatility (Std Dev)',color:'#4d6488'},
+            grid:{color:'rgba(30,45,69,.5)'} },
+        y:{ title:{display:true,text:'Avg Daily Return %',color:'#4d6488'},
+            grid:{color:'rgba(30,45,69,.5)'} }
+      }
+    }
+  });
+}
+
+// ══════════════════════════════════════════════
+// PAGE 1 — STOCK TABLE
+// ══════════════════════════════════════════════
+function initFilters() {
+  const countries = [...new Set(brand.map(b=>b.Country))].sort();
+  const industries = [...new Set(brand.map(b=>b.Industry_Type))].sort();
+  const cs = document.getElementById('filterCountry');
+  const is = document.getElementById('filterIndustry');
+  countries.forEach(c=>{ const o=document.createElement('option'); o.value=c; o.textContent=capitalize(c); cs.appendChild(o); });
+  industries.forEach(i=>{ const o=document.createElement('option'); o.value=i; o.textContent=titleCase(i); is.appendChild(o); });
+}
+
+const FILTER_DEFAULTS = {
+  sortField:'avg_return', sortDir:'desc',
+  filterCountry:'', filterIndustry:'', filterPerf:'',
+  filterVolat:'', filterPrice:'', filterTopN:'0'
+};
+
+function getFilters() {
+  return {
+    sortField:  document.getElementById('sortField').value,
+    sortDir:    document.getElementById('sortDir').value,
+    country:    document.getElementById('filterCountry').value,
+    industry:   document.getElementById('filterIndustry').value,
+    perf:       document.getElementById('filterPerf').value,
+    volat:      document.getElementById('filterVolat').value,
+    price:      document.getElementById('filterPrice').value,
+    topN:       parseInt(document.getElementById('filterTopN').value)||0,
+  };
+}
+
+function resetFilters() {
+  document.getElementById('sortField').value    = FILTER_DEFAULTS.sortField;
+  document.getElementById('sortDir').value      = FILTER_DEFAULTS.sortDir;
+  document.getElementById('filterCountry').value= FILTER_DEFAULTS.filterCountry;
+  document.getElementById('filterIndustry').value=FILTER_DEFAULTS.filterIndustry;
+  document.getElementById('filterPerf').value   = FILTER_DEFAULTS.filterPerf;
+  document.getElementById('filterVolat').value  = FILTER_DEFAULTS.filterVolat;
+  document.getElementById('filterPrice').value  = FILTER_DEFAULTS.filterPrice;
+  document.getElementById('filterTopN').value   = FILTER_DEFAULTS.filterTopN;
+  renderTable();
+}
+
+function isDefaultFilters(f) {
+  return !f.country && !f.industry && !f.perf && !f.volat && !f.price && f.topN===0
+    && f.sortField===FILTER_DEFAULTS.sortField && f.sortDir===FILTER_DEFAULTS.sortDir;
+}
+
+function renderChips(f) {
+  const chips = [];
+  const labels = {
+    country: f.country ? `Country: ${capitalize(f.country)}` : null,
+    industry: f.industry ? `Industry: ${titleCase(f.industry)}` : null,
+    perf: f.perf ? (f.perf==='bullish'?'▲ Bullish Only':'▼ Bearish Only') : null,
+    volat: f.volat ? `Volatility: ${titleCase(f.volat)}` : null,
+    price: f.price ? `Price: ${titleCase(f.price)}` : null,
+    topN: f.topN>0 ? `Top ${f.topN}` : null,
+  };
+  const clear = {
+    country:'filterCountry', industry:'filterIndustry', perf:'filterPerf',
+    volat:'filterVolat', price:'filterPrice',
+  };
+  Object.entries(labels).forEach(([key,label])=>{
+    if(!label) return;
+    const clearFn = key==='topN'
+      ? `document.getElementById('filterTopN').value='0';renderTable()`
+      : `document.getElementById('${clear[key]}').value='';renderTable()`;
+    chips.push(`<span class="chip">${label}<span class="chip-x" onclick="${clearFn}">✕</span></span>`);
+  });
+  document.getElementById('activeChips').innerHTML = chips.join('');
+  // reset btn state
+  const resetBtn = document.getElementById('resetBtn');
+  resetBtn.classList.toggle('inactive', isDefaultFilters(f));
+}
+
+function renderTable() {
+  const f = getFilters();
+  let data = [...brand];
+
+  // Country
+  if(f.country) data = data.filter(d=>d.Country===f.country);
+  // Industry
+  if(f.industry) data = data.filter(d=>d.Industry_Type===f.industry);
+  // Performance
+  if(f.perf==='bullish') data = data.filter(d=>d.avg_return>0);
+  if(f.perf==='bearish') data = data.filter(d=>d.avg_return<=0);
+  // Volatility
+  if(f.volat==='low')    data = data.filter(d=>d.volatility<1.5);
+  if(f.volat==='medium') data = data.filter(d=>d.volatility>=1.5&&d.volatility<=3);
+  if(f.volat==='high')   data = data.filter(d=>d.volatility>3);
+  // Price range
+  if(f.price==='penny')   data = data.filter(d=>d.avg_close<10);
+  if(f.price==='low')     data = data.filter(d=>d.avg_close>=10&&d.avg_close<50);
+  if(f.price==='mid')     data = data.filter(d=>d.avg_close>=50&&d.avg_close<200);
+  if(f.price==='high')    data = data.filter(d=>d.avg_close>=200&&d.avg_close<500);
+  if(f.price==='premium') data = data.filter(d=>d.avg_close>=500);
+  // Sort
+  data.sort((a,b)=> f.sortDir==='asc' ? a[f.sortField]-b[f.sortField] : b[f.sortField]-a[f.sortField]);
+  // Top N
+  if(f.topN>0) data = data.slice(0,f.topN);
+
+  // Results badge
+  document.getElementById('resultsBadge').textContent = `${data.length} result${data.length!==1?'s':''}`;
+  // Chips
+  renderChips(f);
+
+  const tbody = document.getElementById('stockTableBody');
+  const noRes = document.getElementById('noResults');
+
+  if(data.length===0){
+    tbody.innerHTML='';
+    noRes.style.display='block';
+    return;
+  }
+  noRes.style.display='none';
+  tbody.innerHTML = data.map((d,i) => `
+    <tr>
+      <td class="rank">${i+1}</td>
+      <td class="brand-name">${titleCase(d.Brand_Name)}</td>
+      <td><span class="ticker">${d.Ticker}</span></td>
+      <td><span class="badge badge-industry">${d.Industry_Type}</span></td>
+      <td style="text-transform:uppercase;font-family:var(--mono);font-size:11px;color:var(--text3)">${d.Country}</td>
+      <td class="neu">$${d.avg_close.toFixed(2)}</td>
+      <td class="${d.avg_return>=0?'pos':'neg'}">${d.avg_return>=0?'+':''}${d.avg_return.toFixed(4)}%</td>
+      <td class="neu">${d.volatility.toFixed(3)}</td>
+      <td class="neu">${fmt(d.avg_volume,0)}</td>
+    </tr>`).join('');
+}
+
+// ══════════════════════════════════════════════
+// PAGE 2 — TIME SERIES
+// ══════════════════════════════════════════════
+const TS_COLORS = {
+  apple:'#60a5fa', nvidia:'#00d97e', tesla:'#ff4560',
+  amazon:'#f4b942', google:'#a855f7', microsoft:'#2dd4bf',
+  netflix:'#fb923c', meta:'#f472b6'
+};
+function updateTS() {
+  const checked = [...document.querySelectorAll('[onchange="updateTS()"]')]
+    .filter(e=>e.checked).map(e=>e.value);
+  const allDates = [...new Set(
+    checked.flatMap(b => (tsData[b]||{dates:[]}).dates)
+  )].sort();
+  const datasets = checked.map(b => {
+    const td = tsData[b]||{dates:[],closes:[]};
+    // align to allDates
+    const map = Object.fromEntries(td.dates.map((d,i)=>[d,td.closes[i]]));
+    return {
+      label: capitalize(b),
+      data: allDates.map(d => map[d]??null),
+      borderColor: TS_COLORS[b]||'#fff',
+      backgroundColor: (TS_COLORS[b]||'#fff')+'22',
+      borderWidth: 2,
+      pointRadius: 0,
+      tension: 0.3,
+      spanGaps: true,
+    };
+  });
+  if(charts.tsChart) { charts.tsChart.data.labels=allDates; charts.tsChart.data.datasets=datasets; charts.tsChart.update(); return; }
+  charts.tsChart = new Chart(document.getElementById('tsChart'), {
+    type:'line',
+    data:{ labels:allDates, datasets },
+    options:{
+      maintainAspectRatio:false,
+      responsive:true,
+      interaction:{ mode:'index', intersect:false },
+      plugins:{ legend:{ display:true, position:'top',
+        labels:{ color:'#8ba3c7', font:{size:10,family:"'Space Mono'"}, boxWidth:10, padding:12 }}},
+      scales:{
+        x:{ grid:{color:'rgba(30,45,69,.4)'}, ticks:{ maxTicksLimit:12, maxRotation:0 } },
+        y:{ grid:{color:'rgba(30,45,69,.4)'},
+            ticks:{ callback:v=>'$'+v.toFixed(0) } }
+      }
+    }
+  });
+}
+
+// ══════════════════════════════════════════════
+// PAGE 2 — CANDLESTICK (SVG)
+// ══════════════════════════════════════════════
+function renderCandle() {
+  const stock = document.getElementById('candleSelect').value;
+  const data  = candles[stock] || [];
+  const W     = document.getElementById('candleContainer').clientWidth || 900;
+  const H     = 320;
+  const PAD   = { top:20, bottom:40, left:60, right:20 };
+  const iW    = W - PAD.left - PAD.right;
+  const iH    = H - PAD.top  - PAD.bottom;
+  const n     = data.length;
+  if(!n) return;
+
+  const prices = data.flatMap(d=>[d.High,d.Low]);
+  const yMin   = Math.min(...prices);
+  const yMax   = Math.max(...prices);
+  const yRange = yMax - yMin || 1;
+  const yScale = v => PAD.top + iH - ((v-yMin)/yRange)*iH;
+  const candleW = Math.max(2, Math.floor(iW/n) - 1);
+  const xPos    = i => PAD.left + (i+.5)*(iW/n);
+
+  let svg = `<svg id="candleSvg" width="${W}" height="${H}" style="font-family:var(--mono)">`;
+  // Grid
+  const ticks = 5;
+  for(let i=0;i<=ticks;i++){
+    const v = yMin + (yRange/ticks)*i;
+    const y = yScale(v);
+    svg += `<line x1="${PAD.left}" y1="${y}" x2="${W-PAD.right}" y2="${y}" stroke="#1e2d45" stroke-width="1"/>`;
+    svg += `<text x="${PAD.left-6}" y="${y+4}" fill="#4d6488" font-size="9" text-anchor="end">$${v.toFixed(0)}</text>`;
+  }
+  // Candles
+  data.forEach((d,i) => {
+    const bull = d.Close >= d.Open;
+    const col  = bull ? '#00d97e' : '#ff4560';
+    const x    = xPos(i);
+    const oY   = yScale(d.Open);
+    const cY   = yScale(d.Close);
+    const hY   = yScale(d.High);
+    const lY   = yScale(d.Low);
+    const bodyTop = Math.min(oY,cY);
+    const bodyH   = Math.max(1, Math.abs(oY-cY));
+    svg += `<line x1="${x}" y1="${hY}" x2="${x}" y2="${lY}" stroke="${col}" stroke-width="1" opacity=".8"/>`;
+    svg += `<rect x="${x-candleW/2}" y="${bodyTop}" width="${candleW}" height="${bodyH}"
+      fill="${bull?col:'none'}" stroke="${col}" stroke-width="1" opacity=".9"
+      data-i="${i}" class="candle-rect" style="cursor:crosshair"/>`;
+  });
+  // X axis dates (every 10)
+  for(let i=0;i<n;i+=10) {
+    svg += `<text x="${xPos(i)}" y="${H-10}" fill="#4d6488" font-size="8" text-anchor="middle">${data[i].Date.slice(5)}</text>`;
+  }
+  svg += '</svg>';
+  document.getElementById('candleContainer').innerHTML = svg;
+  // Hover
+  document.getElementById('candleContainer').querySelectorAll('.candle-rect').forEach(rect => {
+    rect.addEventListener('mouseover', e=>{
+      const i = parseInt(e.target.dataset.i);
+      const d = data[i];
+      document.getElementById('candleTooltip').innerHTML =
+        `<span style="color:var(--text3)">${d.Date}</span> &nbsp;
+         O:<span style="color:var(--gold)">$${d.Open}</span> &nbsp;
+         H:<span style="color:var(--green)">$${d.High}</span> &nbsp;
+         L:<span style="color:var(--red)">$${d.Low}</span> &nbsp;
+         C:<span style="color:var(--cyan)">$${d.Close}</span> &nbsp;
+         Vol:<span style="color:var(--text2)">${fmt(d.Volume,0)}</span>`;
+    });
+  });
+}
+
+// ══════════════════════════════════════════════
+// PAGE 3 — INDUSTRIES
+// ══════════════════════════════════════════════
+function renderIndustries() {
+  const sorted = [...indData].sort((a,b)=>b.avg_return-a.avg_return);
+  const labels = sorted.map(d=>titleCase(d.Industry_Type));
+  const colors = sorted.map((_,i)=>IND_COLORS[i]);
+
+  // Return bar
+  if(charts.indReturnChart) charts.indReturnChart.destroy();
+  charts.indReturnChart = new Chart(document.getElementById('indReturnChart'), {
+    type:'bar', data:{ labels,
+      datasets:[{ data:sorted.map(d=>d.avg_return), backgroundColor:colors, borderRadius:3, barPercentage:.7 }]},
+    options:{ maintainAspectRatio:false, indexAxis:'y', responsive:true,
+      scales:{ x:{grid:{color:'rgba(30,45,69,.5)'}, ticks:{callback:v=>v.toFixed(3)+'%'}}, y:{grid:{display:false}} },
+      plugins:{ tooltip:{ callbacks:{ label:ctx=>` ${ctx.raw.toFixed(4)}%` }}}
+    }
+  });
+
+  // Volatility bar
+  const vSorted = [...indData].sort((a,b)=>b.volatility-a.volatility);
+  if(charts.indVolatChart) charts.indVolatChart.destroy();
+  charts.indVolatChart = new Chart(document.getElementById('indVolatChart'), {
+    type:'bar', data:{ labels:vSorted.map(d=>titleCase(d.Industry_Type)),
+      datasets:[{ data:vSorted.map(d=>d.volatility),
+        backgroundColor:vSorted.map(d=>d.volatility>3?'#ff4560':d.volatility>2?'#f4b942':'#00b4d8'),
+        borderRadius:3, barPercentage:.7 }]},
+    options:{ maintainAspectRatio:false, indexAxis:'y', responsive:true,
+      scales:{ x:{grid:{color:'rgba(30,45,69,.5)'}}, y:{grid:{display:false}} },
+      plugins:{ tooltip:{ callbacks:{ label:ctx=>` σ ${ctx.raw.toFixed(3)}` }}}
+    }
+  });
+
+  renderTreemap();
+  renderHeatmap();
+}
+
+function renderTreemap() {
+  const el = document.getElementById('treemap');
+  const W = el.clientWidth, H = 340;
+  const data = [...indData].sort((a,b)=>b.avg_volume-a.avg_volume);
+  const total = data.reduce((s,d)=>s+d.avg_volume,0);
+  // Simple squarified treemap (row-based)
+  let x=0, cells=[];
+  data.forEach((d,i) => {
+    const pct = d.avg_volume/total;
+    const w = pct*W;
+    cells.push({ x, y:0, w, h:H, d, color:IND_COLORS[i] });
+    x+=w;
+  });
+  el.innerHTML = cells.map(c => {
+    const ret = c.d.avg_return;
+    const border = ret>0.05?'2px solid #00d97e':ret<0?'2px solid #ff4560':'none';
+    return `<div class="treemap-cell" style="left:${c.x.toFixed(1)}px;top:0;width:${c.w.toFixed(1)}px;height:${c.h}px;background:${c.color}22;border:${border};border-right:1px solid var(--bg)">
+      ${c.w>60?`<div class="treemap-label">${titleCase(c.d.Industry_Type)}</div><div class="treemap-val">${fmt(c.d.avg_volume,0)}/day</div>`:''}
+    </div>`;
+  }).join('');
+}
+
+function renderHeatmap() {
+  const metrics = ['avg_return','volatility','avg_volume','companies'];
+  const mLabels = ['Return %','Volatility','Avg Volume','# Stocks'];
+  const data = [...indData].sort((a,b)=>b.avg_return-a.avg_return);
+  // Normalize each metric 0→1
+  const normalized = metrics.map(m => {
+    const vals = data.map(d=>d[m]);
+    const mn=Math.min(...vals), mx=Math.max(...vals);
+    return data.map(d=>(d[m]-mn)/(mx-mn||1));
+  });
+  const cols = metrics.length+1;
+  let html = `<div class="heatmap-grid" style="grid-template-columns:120px ${metrics.map(()=>'1fr').join(' ')};min-width:600px">`;
+  // Header
+  html += `<div style="padding:6px;font-family:var(--mono);font-size:9px;color:var(--text3)">INDUSTRY</div>`;
+  mLabels.forEach(m => { html += `<div style="padding:6px 4px;font-family:var(--mono);font-size:9px;color:var(--text3);text-align:center">${m}</div>`; });
+  data.forEach((d,row) => {
+    html += `<div style="padding:6px;font-family:var(--mono);font-size:9px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${titleCase(d.Industry_Type)}</div>`;
+    metrics.forEach((m,col) => {
+      const n = normalized[col][row];
+      const r=d[m];
+      let bg, color;
+      if(m==='avg_return') { bg = r>=0?`rgba(0,217,126,${.15+n*.6})`:`rgba(255,69,96,${.15+n*.6})`; color=r>=0?'#00d97e':'#ff4560'; }
+      else if(m==='volatility') { bg=`rgba(255,69,96,${.1+n*.6})`; color='#ff4560'; }
+      else { bg=`rgba(0,180,216,${.1+n*.6})`; color='#00b4d8'; }
+      const fmtVal = m==='avg_return'?r.toFixed(3)+'%':m==='volatility'?r.toFixed(2):m==='companies'?r:fmt(r,0);
+      html += `<div class="heat-cell" style="background:${bg};color:${color}">${fmtVal}</div>`;
+    });
+  });
+  html += '</div>';
+  document.getElementById('heatmapContainer').innerHTML = html;
+}
+
+// ══════════════════════════════════════════════
+// PAGE 4 — COUNTRIES
+// ══════════════════════════════════════════════
+function renderCountries() {
+  // KPI cards
+  const sorted = [...ctrData].sort((a,b)=>b.avg_return-a.avg_return);
+  document.getElementById('countryKpis').innerHTML = sorted.map(c => `
+    <div class="kpi-card" style="--accent:var(--cyan)">
+      <div class="kpi-label">${c.Country.toUpperCase()}</div>
+      <div class="kpi-value ${c.avg_return>=0?'kpi-positive':'kpi-negative'}">${c.avg_return>=0?'+':''}${c.avg_return.toFixed(4)}%</div>
+      <div class="kpi-sub">${c.companies} companies · vol ${fmt(c.avg_volume,0)}/day</div>
+    </div>`).join('');
+
+  // Return bars
+  const maxRet = Math.max(...ctrData.map(d=>Math.abs(d.avg_return)));
+  document.getElementById('countryReturnBars').innerHTML = sorted.map(c => {
+    const pct = (Math.abs(c.avg_return)/maxRet*100).toFixed(1);
+    const col  = c.avg_return>=0?'#00d97e':'#ff4560';
+    return `<div class="country-row">
+      <div class="country-name">${c.Country}</div>
+      <div class="bar-wrap"><div class="bar-fill" style="width:${pct}%;background:${col}"></div>
+      <div class="bar-label" style="color:${col}">${c.avg_return>=0?'+':''}${c.avg_return.toFixed(4)}%</div></div>
+    </div>`;
+  }).join('');
+
+  // Volume bars
+  const sortedVol = [...ctrData].sort((a,b)=>b.avg_volume-a.avg_volume);
+  const maxVol = sortedVol[0].avg_volume;
+  document.getElementById('countryVolBars').innerHTML = sortedVol.map(c => {
+    const pct = (c.avg_volume/maxVol*100).toFixed(1);
+    return `<div class="country-row">
+      <div class="country-name">${c.Country}</div>
+      <div class="bar-wrap"><div class="bar-fill" style="width:${pct}%;background:var(--cyan2)"></div>
+      <div class="bar-label">${fmt(c.avg_volume,0)}</div></div>
+    </div>`;
+  }).join('');
+
+  // Scatter
+  if(charts.countryScatter) charts.countryScatter.destroy();
+  charts.countryScatter = new Chart(document.getElementById('countryScatter'), {
+    type:'bubble',
+    data:{ datasets:[{
+      data: ctrData.map(c=>({ x:c.avg_volatility||1, y:c.avg_return, r:Math.max(8,Math.log10(c.avg_volume+1)*4), label:c.Country, companies:c.companies })),
+      backgroundColor: ctrData.map((_,i)=>IND_COLORS[i]+'bb'),
+      borderColor: ctrData.map((_,i)=>IND_COLORS[i]),
+      borderWidth: 2,
+    }]},
+    options:{
+      maintainAspectRatio:false,
+      responsive:true,
+      plugins:{ tooltip:{ callbacks:{
+        label: ctx=>{
+          const d=ctx.raw;
+          return [`${d.label.toUpperCase()}`, `Return: ${d.y.toFixed(4)}%`, `Companies: ${d.companies}`];
+        }
+      }}},
+      scales:{
+        x:{ title:{display:true,text:'Avg Volatility',color:'#4d6488'}, grid:{color:'rgba(30,45,69,.5)'} },
+        y:{ title:{display:true,text:'Avg Daily Return %',color:'#4d6488'}, grid:{color:'rgba(30,45,69,.5)'} }
+      }
+    }
+  });
+}
+
+// ══════════════════════════════════════════════
+// PAGE 5 — RISK & VOLATILITY
+// ══════════════════════════════════════════════
+function renderRisk() {
+  // Risk-Return scatter
+  const indList = [...new Set(brand.map(b=>b.Industry_Type))];
+  const datasets = indList.map((ind,i) => {
+    const stocks = brand.filter(b=>b.Industry_Type===ind);
+    return {
+      label: titleCase(ind),
+      data: stocks.map(s=>({
+        x: s.volatility,
+        y: s.avg_return,
+        r: Math.max(5, Math.min(25, Math.log10(s.avg_volume+1)*2.5)),
+        name: s.Brand_Name, ticker: s.Ticker
+      })),
+      backgroundColor: IND_COLORS[i]+'88',
+      borderColor: IND_COLORS[i],
+      borderWidth: 1,
+    };
+  });
+  if(charts.riskReturnChart) charts.riskReturnChart.destroy();
+  charts.riskReturnChart = new Chart(document.getElementById('riskReturnChart'), {
+    type:'bubble', data:{datasets},
+    options:{
+      maintainAspectRatio:false,
+      responsive:true,
+      plugins:{
+        legend:{ display:true, position:'right',
+          labels:{color:'#8ba3c7',font:{size:9,family:"'Space Mono'"},boxWidth:8,padding:8}},
+        tooltip:{ callbacks:{
+          label: ctx=>`${titleCase(ctx.raw.name)} — R:${ctx.raw.y.toFixed(3)}% σ:${ctx.raw.x.toFixed(2)}`
+        }}
+      },
+      scales:{
+        x:{ title:{display:true,text:'Volatility (σ)',color:'#4d6488'}, grid:{color:'rgba(30,45,69,.5)'} },
+        y:{ title:{display:true,text:'Avg Daily Return %',color:'#4d6488'}, grid:{color:'rgba(30,45,69,.5)'} }
+      }
+    }
+  });
+
+  // Top 15 volatility
+  const top15 = [...brand].sort((a,b)=>b.volatility-a.volatility).slice(0,15);
+  if(charts.volatRankChart) charts.volatRankChart.destroy();
+  charts.volatRankChart = new Chart(document.getElementById('volatRankChart'), {
+    type:'bar',
+    data:{ labels:top15.map(d=>titleCase(d.Brand_Name)),
+      datasets:[{ data:top15.map(d=>d.volatility),
+        backgroundColor:top15.map(d=>d.volatility>4?'#ff4560':d.volatility>3?'#f4b942':'#00b4d8'),
+        borderRadius:4, barPercentage:.75 }]},
+    options:{ maintainAspectRatio:false, indexAxis:'y', responsive:true,
+      scales:{ x:{grid:{color:'rgba(30,45,69,.5)'},ticks:{callback:v=>v.toFixed(1)+'σ'}}, y:{grid:{display:false},ticks:{font:{size:10}}} },
+      plugins:{ tooltip:{callbacks:{label:ctx=>` σ = ${ctx.raw.toFixed(3)}`}}}
+    }
+  });
+
+  // Volatility by industry
+  const indVolat = [...indData].sort((a,b)=>b.volatility-a.volatility);
+  if(charts.volatDistChart) charts.volatDistChart.destroy();
+  charts.volatDistChart = new Chart(document.getElementById('volatDistChart'), {
+    type:'radar',
+    data:{
+      labels:indVolat.map(d=>titleCase(d.Industry_Type)),
+      datasets:[
+        { label:'Volatility', data:indVolat.map(d=>d.volatility),
+          backgroundColor:'rgba(255,69,96,.15)', borderColor:'#ff4560', pointBackgroundColor:'#ff4560', pointRadius:3 },
+        { label:'Return (×10)', data:indVolat.map(d=>d.avg_return*10),
+          backgroundColor:'rgba(0,217,126,.1)', borderColor:'#00d97e', pointBackgroundColor:'#00d97e', pointRadius:3 }
+      ]
+    },
+    options:{ maintainAspectRatio:false, responsive:true,
+      plugins:{ legend:{ display:true, position:'top', labels:{color:'#8ba3c7',font:{size:10},boxWidth:10} }},
+      scales:{ r:{ grid:{color:'rgba(30,45,69,.6)'}, ticks:{backdropColor:'transparent',color:'#4d6488',font:{size:8}},
+        pointLabels:{color:'#8ba3c7',font:{size:8}} }}
+    }
+  });
+
+  // Risk table
+  const riskSorted = [...brand].sort((a,b)=>b.volatility-a.volatility);
+  document.getElementById('riskTableBody').innerHTML = riskSorted.map((d,i) => {
+    const profile = d.volatility>4?'🔴 Extreme':d.volatility>3?'🟠 High':d.volatility>2?'🟡 Medium':'🟢 Low';
+    return `<tr>
+      <td class="rank">${i+1}</td>
+      <td class="brand-name">${titleCase(d.Brand_Name)}</td>
+      <td><span class="ticker">${d.Ticker}</span></td>
+      <td class="${d.avg_return>=0?'pos':'neg'}">${d.avg_return>=0?'+':''}${d.avg_return.toFixed(4)}%</td>
+      <td style="font-family:var(--mono);font-size:12px;color:${d.volatility>4?'#ff4560':d.volatility>3?'#f4b942':d.volatility>2?'#00b4d8':'#00d97e'}">${d.volatility.toFixed(3)}</td>
+      <td><span class="badge badge-industry">${d.Industry_Type}</span></td>
+      <td style="font-size:12px">${profile}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════════
+// PAGE 6 — COMPANY DEEP DIVE
+// ══════════════════════════════════════════════
+function initDiveSelect() {
+  const sel = document.getElementById('diveSelect');
+  const sorted = [...brand].sort((a,b)=>a.Brand_Name.localeCompare(b.Brand_Name));
+  sorted.forEach(b => {
+    const o = document.createElement('option');
+    o.value = b.Brand_Name;
+    o.textContent = `${titleCase(b.Brand_Name)} (${b.Ticker})`;
+    sel.appendChild(o);
+  });
+  renderDive();
+}
+
+function renderDive() {
+  const name = document.getElementById('diveSelect').value;
+  const d = brand.find(b=>b.Brand_Name===name);
+  if(!d) return;
+
+  // Header
+  document.getElementById('diveHeader').innerHTML = `
+    <div class="company-logo-box">${d.Ticker.slice(0,3)}</div>
+    <div>
+      <div class="company-name">${titleCase(d.Brand_Name)}</div>
+      <div class="company-meta">${d.Ticker} · ${titleCase(d.Industry_Type)} · ${d.Country.toUpperCase()}</div>
+    </div>
+    <div class="company-price">
+      <div class="company-price-val">$${d.avg_close.toFixed(2)}</div>
+      <div class="company-price-change ${d.avg_return>=0?'kpi-positive':'kpi-negative'}">${d.avg_return>=0?'▲ +':'▼ '}${d.avg_return.toFixed(4)}% avg daily</div>
+    </div>`;
+
+  // KPI cards
+  document.getElementById('diveKpis').innerHTML = [
+    { label:'Avg Close', value:'$'+d.avg_close.toFixed(2), accent:'var(--cyan)' },
+    { label:'Avg Return', value:(d.avg_return>=0?'+':'')+d.avg_return.toFixed(4)+'%', accent:d.avg_return>=0?'var(--green)':'var(--red)' },
+    { label:'Volatility', value:d.volatility.toFixed(3)+'σ', accent:'var(--gold)' },
+    { label:'Avg Volume', value:fmt(d.avg_volume,0), accent:'var(--cyan)' },
+    { label:'All-Time High', value:'$'+d.max_close.toFixed(2), accent:'var(--green)' },
+    { label:'All-Time Low', value:'$'+d.min_close.toFixed(2), accent:'var(--red)' },
+  ].map(k=>`<div class="kpi-card" style="--accent:${k.accent}">
+    <div class="kpi-label">${k.label}</div>
+    <div class="kpi-value">${k.value}</div>
+  </div>`).join('');
+
+  // Price chart — always reset wrapper first so canvas always exists
+  document.getElementById('divePriceTitle').textContent = `Price History — ${titleCase(name)} (Monthly Avg)`;
+  if(charts.divePriceChart) { charts.divePriceChart.destroy(); charts.divePriceChart = null; }
+  const priceWrapper = document.getElementById('divePriceWrapper');
+  priceWrapper.innerHTML = '<canvas id=\"divePriceChart\"></canvas>';
+  const tsEntry = tsData[name];
+  if(tsEntry) {
+    charts.divePriceChart = new Chart(document.getElementById('divePriceChart'), {
+      type:'line',
+      data:{ labels:tsEntry.dates, datasets:[{
+        data:tsEntry.closes, borderColor:COLORS.cyan, backgroundColor:COLORS.cyan+'22',
+        borderWidth:2, pointRadius:0, tension:.3, fill:true
+      }]},
+      options:{ maintainAspectRatio:false, responsive:true,
+        scales:{
+          x:{grid:{color:'rgba(30,45,69,.4)'},ticks:{maxTicksLimit:12,maxRotation:0}},
+          y:{grid:{color:'rgba(30,45,69,.4)'},ticks:{callback:v=>'$'+v.toFixed(0)}}
+        },
+        plugins:{tooltip:{callbacks:{label:ctx=>`$${ctx.raw.toFixed(2)}`}}}
+      }
+    });
+  } else {
+    priceWrapper.innerHTML = '<div style="color:var(--text3);font-family:var(--mono);font-size:11px;padding:40px;text-align:center;letter-spacing:1px">PRICE TREND DATA NOT AVAILABLE FOR THIS STOCK</div>';
+  }
+
+  // Return distribution (histogram-like with chart.js bar)
+  const peer = brand.filter(b=>b.Brand_Name!==name && b.Industry_Type===d.Industry_Type);
+  const peerReturns = peer.map(b=>b.avg_return);
+  const buckets = 12;
+  const minR = Math.min(d.avg_return,...peerReturns);
+  const maxR = Math.max(d.avg_return,...peerReturns);
+  const step = (maxR-minR)/(buckets-1)||.01;
+  const allR = [d.avg_return,...peerReturns];
+  const hLabels = Array.from({length:buckets},(_,i)=>(minR+i*step).toFixed(3)+'%');
+  const hData   = Array(buckets).fill(0);
+  allR.forEach(r=>{ const idx=Math.min(buckets-1,Math.floor((r-minR)/step)); hData[idx]++; });
+  if(charts.diveReturnDist) charts.diveReturnDist.destroy();
+  charts.diveReturnDist = new Chart(document.getElementById('diveReturnDist'), {
+    type:'bar', data:{ labels:hLabels,
+      datasets:[{ data:hData, backgroundColor:COLORS.cyan+'88', borderRadius:3 }]},
+    options:{ maintainAspectRatio:false, responsive:true,
+      scales:{x:{grid:{display:false},ticks:{maxRotation:45,font:{size:9}}},y:{grid:{color:'rgba(30,45,69,.5)'}}},
+      plugins:{title:{display:true,text:'Return distribution (industry peers)',color:'#4d6488',font:{size:10}}}
+    }
+  });
+
+  // Peer comparison
+  const peersAll = brand.filter(b=>b.Industry_Type===d.Industry_Type).sort((a,b)=>b.avg_return-a.avg_return);
+  if(charts.divePeerChart) charts.divePeerChart.destroy();
+  charts.divePeerChart = new Chart(document.getElementById('divePeerChart'), {
+    type:'bar',
+    data:{ labels:peersAll.map(b=>titleCase(b.Brand_Name)),
+      datasets:[{ data:peersAll.map(b=>b.avg_return),
+        backgroundColor:peersAll.map(b=>b.Brand_Name===name?COLORS.gold+'cc':COLORS.cyan+'55'),
+        borderColor:peersAll.map(b=>b.Brand_Name===name?COLORS.gold:COLORS.cyan),
+        borderWidth:peersAll.map(b=>b.Brand_Name===name?2:1),
+        borderRadius:4, barPercentage:.8 }]},
+    options:{ maintainAspectRatio:false, responsive:true,
+      scales:{x:{grid:{display:false},ticks:{font:{size:10},maxRotation:30}},y:{grid:{color:'rgba(30,45,69,.5)'},ticks:{callback:v=>v.toFixed(3)+'%'}}},
+      plugins:{tooltip:{callbacks:{label:ctx=>`Return: ${ctx.raw.toFixed(4)}%`}}}
+    }
+  });
+}
+
+// ══════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', ()=>{
+  renderKpis();
+  renderGainersLosers();
+  renderBubbleAll();
+  initFilters();
+  renderTable();
+  updateTS();
+  renderCandle();
+  renderIndustries();
+  renderCountries();
+  renderRisk();
+  initDiveSelect();
+});
+
+window.addEventListener('resize', ()=>{
+  renderCandle();
+  renderTreemap();
+});
+</script>
+</body>
+</html>
