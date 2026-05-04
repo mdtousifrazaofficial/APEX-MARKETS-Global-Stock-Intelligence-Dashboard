@@ -148,7 +148,7 @@ apex-markets-dashboard/
 ## Author
 
 **[MD TOUSIF RAZA]**  
-Data Analyst | [LinkedIn](https://linkedin.com/in/md-tousif-raza-mtr) · [Portfolio](https://mdtousifrazaofficial.github.io) · [GitHub](https://github.com/yourusername)
+Data Analyst | [LinkedIn](https://linkedin.com/in/md-tousif-raza-mtr) · [Portfolio](https://mdtousifrazaofficial.github.io) · [GitHub](https://github.com/mdtousifrazaofficial)
 
 ---
 
