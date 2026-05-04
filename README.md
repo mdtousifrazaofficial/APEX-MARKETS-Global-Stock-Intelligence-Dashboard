@@ -89,25 +89,6 @@ Cleaning was performed using **Julius AI** for rapid iteration, with manual vali
 No Tableau. No Power BI. No paid tools. Fully open and browser-native.
 
 ---
-
-## Getting Started
-
-```bash
-# Clone the repo
-git clone https://github.com/yourusername/apex-markets-dashboard.git
-
-# Navigate to the project
-cd apex-markets-dashboard
-
-# Open the dashboard
-open apex_markets_dashboard.html
-# or just double-click the file in your file explorer
-```
-
-No npm install. No build step. No backend required. Works offline.
-
----
-
 ## Project Structure
 
 ```
