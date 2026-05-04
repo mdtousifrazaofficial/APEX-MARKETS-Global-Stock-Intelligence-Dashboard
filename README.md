@@ -50,6 +50,13 @@ The goal was simple: take messy, real-world stock data and turn it into somethin
 
 ---
 
+
+## 📂 Dataset
+- Full dataset (external due to size):  
+👉 [Download from Google Drive](https://drive.google.com/drive/folders/1GJR0DMfj42AmwUEHqLhSAd_LydX7bvEH?usp=sharing)
+
+---
+
 ## Dataset
 
 | Attribute | Detail |
