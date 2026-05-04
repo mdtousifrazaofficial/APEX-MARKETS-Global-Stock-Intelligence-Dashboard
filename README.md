@@ -8,6 +8,12 @@
 ## Live Preview
 
 ![Dashboard Preview](./assets/1.png)
+![Dashboard Preview](./assets/2.png)
+![Dashboard Preview](./assets/3.png)
+![Dashboard Preview](./assets/4.png)
+![Dashboard Preview](./assets/5.png)
+![Dashboard Preview](./assets/6.png)
+![Dashboard Preview](./assets/7.png)
 
 > Open `apex_markets_dashboard.html` directly in any browser — no server, no dependencies, no setup.
 
@@ -110,7 +116,13 @@ apex-markets-dashboard/
 ├── apex_markets_dashboard.html   # Self-contained dashboard (all JS/CSS inline)
 ├── world_stocks_cleaned.csv      # Cleaned dataset used for analysis
 ├── assets/
-│   └── preview.png               # Dashboard screenshot for README
+│   └── 1.png  # Dashboard screenshot for README
+│   └── 2.png 
+│   └── 3.png  
+│   └── 4.png  
+│   └── 5.png  
+│   └── 6.png  
+│   └── 7.png     
 └── README.md
 ```
 
@@ -135,8 +147,8 @@ apex-markets-dashboard/
 
 ## Author
 
-**[Your Name]**  
-Data Analyst | [LinkedIn](https://linkedin.com/in/yourprofile) · [Portfolio](https://yourportfolio.com) · [GitHub](https://github.com/yourusername)
+**[MD TOUSIF RAZA]**  
+Data Analyst | [LinkedIn](https://linkedin.com/in/md-tousif-raza-mtr) · [Portfolio](https://mdtousifrazaofficial.github.io) · [GitHub](https://github.com/yourusername)
 
 ---
 
