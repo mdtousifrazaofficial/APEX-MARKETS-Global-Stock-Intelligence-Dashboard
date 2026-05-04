@@ -7,7 +7,7 @@
 
 ## Live Preview
 
-![Dashboard Preview](./assets/preview.png)
+![Dashboard Preview](./assets/1.png)
 
 > Open `apex_markets_dashboard.html` directly in any browser — no server, no dependencies, no setup.
 
